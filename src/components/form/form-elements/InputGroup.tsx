@@ -18,7 +18,7 @@ export default function InputGroup() {
   };
   return (
     <ComponentCard title="Input Group">
-      <div className="space-y-6">
+      <div className="space-y-3">
         <div>
           <Label>Email</Label>
           <div className="relative">

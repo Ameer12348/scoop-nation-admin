@@ -9,7 +9,7 @@ export default function TextAreaInput() {
   const [messageTwo, setMessageTwo] = useState("");
   return (
     <ComponentCard title="Textarea input field">
-      <div className="space-y-6">
+      <div className="space-y-3">
         {/* Default TextArea */}
         <div>
           <Label>Description</Label>

@@ -26,7 +26,7 @@ export default function InputStates() {
       title="Input States"
       desc="Validation styles for error, success and disabled states on form controls."
     >
-      <div className="space-y-5 sm:space-y-6">
+      <div className="space-y-5 sm:space-y-3">
         {/* Error Input */}
         <div>
           <Label>Email</Label>
