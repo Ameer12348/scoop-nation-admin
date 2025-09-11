@@ -1,4 +1,3 @@
-import Badge from "../ui/badge/Badge"
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table"
 
 
@@ -65,7 +64,7 @@ const tableData: TableData = [
 
 
 
-const UsersDataTable = ({name}:any) => {
+const UsersDataTable = (/*{name}:any*/) => {
 
 
   return (
