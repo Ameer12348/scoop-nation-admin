@@ -18,6 +18,7 @@ import {
   UserCircleIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
+import { FaUsers } from "react-icons/fa";
 
 type NavItem = {
   name: string;
@@ -31,6 +32,11 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+  },
+  {
+    icon: <FaUsers size={24} />,
+    name: "Users",
+    path: "/users",
   },
   {
     icon: <CalenderIcon />,
