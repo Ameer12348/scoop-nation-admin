@@ -19,7 +19,7 @@ import {
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 import { FaUsers } from "react-icons/fa";
-
+import { IoSettingsSharp } from "react-icons/io5";
 type NavItem = {
   name: string;
   icon: React.ReactNode;
@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    subItems: [{ name: "Ecommerce", path: "/",  }],
   },
   {
     icon: <FaUsers size={24} />,
@@ -52,19 +52,19 @@ const navItems: NavItem[] = [
   {
     name: "Forms",
     icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+    subItems: [{ name: "Form Elements", path: "/form-elements",  }],
   },
   {
     name: "Tables",
     icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+    subItems: [{ name: "Basic Tables", path: "/basic-tables",  }],
   },
   {
     name: "Pages",
     icon: <PageIcon />,
     subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
+      { name: "Blank Page", path: "/blank",  },
+      { name: "404 Error", path: "/error-404",  },
     ],
   },
 ];
@@ -74,28 +74,35 @@ const othersItems: NavItem[] = [
     icon: <PieChartIcon />,
     name: "Charts",
     subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
+      { name: "Line Chart", path: "/line-chart",  },
+      { name: "Bar Chart", path: "/bar-chart",  },
     ],
   },
   {
     icon: <BoxCubeIcon />,
     name: "UI Elements",
     subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
+      { name: "Alerts", path: "/alerts",  },
+      { name: "Avatar", path: "/avatars",  },
+      { name: "Badge", path: "/badge",  },
+      { name: "Buttons", path: "/buttons",  },
+      { name: "Images", path: "/images",  },
+      { name: "Videos", path: "/videos",  },
+    ],
+  },
+  {
+    icon: <IoSettingsSharp />,
+    name: "Settings",
+    subItems: [
+      { name: "Banners", path: "/banners",  },
     ],
   },
   {
     icon: <PlugInIcon />,
     name: "Authentication",
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
+      { name: "Sign In", path: "/signin",  },
+      { name: "Sign Up", path: "/signup",  },
     ],
   },
 ];
@@ -207,7 +214,7 @@ const AppSidebar: React.FC = () => {
                             new
                           </span>
                         )}
-                        {subItem.pro && (
+                        {/* {subItem.pro && (
                           <span
                             className={`ml-auto ${
                               isActive(subItem.path)
@@ -217,7 +224,7 @@ const AppSidebar: React.FC = () => {
                           >
                             pro
                           </span>
-                        )}
+                        )} */}
                       </span>
                     </Link>
                   </li>
