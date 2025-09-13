@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -24,24 +25,25 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import { Pencil, X } from 'lucide-react';
 
 // Import your existing ImageGallery component
-import ImageGallery, {  ImageType } from '@/components/gallery/ImageGallery'; // Adjust the path as needed
+import ImageGallery, { ImageType } from '@/components/gallery/ImageGallery';
 import TableContainerCard from '@/components/common/TableContainerCard';
 import SearchAndPaginationWrapper from '@/components/common/SearchAndPaginationWrapper';
 import { FaRegEdit } from 'react-icons/fa';
 import Image from 'next/image';
 
-
-const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+// ✅ FIX: make it mutable string[]
+const daysOfWeek: string[] = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+];
 
 const baseSchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -136,6 +138,7 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+                    {/* --- Name Field --- */}
                     <FormField
                         control={form.control}
                         name="name"
@@ -149,6 +152,8 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             </FormItem>
                         )}
                     />
+
+                    {/* --- Description Field --- */}
                     <FormField
                         control={form.control}
                         name="description"
@@ -162,6 +167,8 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             </FormItem>
                         )}
                     />
+
+                    {/* --- Priority Field --- */}
                     <FormField
                         control={form.control}
                         name="priority"
@@ -175,6 +182,8 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             </FormItem>
                         )}
                     />
+
+                    {/* --- Available From Field --- */}
                     <FormField
                         control={form.control}
                         name="availableFrom"
@@ -188,6 +197,8 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             </FormItem>
                         )}
                     />
+
+                    {/* --- Available To Field --- */}
                     <FormField
                         control={form.control}
                         name="availableTo"
@@ -201,6 +212,8 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             </FormItem>
                         )}
                     />
+
+                    {/* --- App Only Switch --- */}
                     <FormField
                         control={form.control}
                         name="appOnly"
@@ -213,12 +226,14 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             </FormItem>
                         )}
                     />
+
+                    {/* --- Days Checkboxes --- */}
                     <FormField
                         control={form.control}
                         name="days"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Status</FormLabel>
+                                <FormLabel>Days</FormLabel>
                                 <div className="space-y-2">
                                     {daysOfWeek.map((day) => (
                                         <div key={day} className="flex items-center space-x-2">
@@ -240,9 +255,11 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             </FormItem>
                         )}
                     />
+
+                    {/* --- Image Upload --- */}
                     <FormItem>
                         <FormLabel>Image</FormLabel>
-                        {preview && <Image width={140} height={140} src={preview} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
+                        {preview && <Image width={140} height={140} src={preview || ''} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
                         <div className="flex space-x-4 mt-2">
                             <Button
                                 type="button"
@@ -277,31 +294,35 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                             }}
                         />
                         <p className="text-sm text-muted-foreground mt-2">
-                            Note: Image Resolution should be less than or equal to 400x400 pixels and Size should be less than or equal to 200 KB
+                            Note: Image Resolution ≤ 400x400 px, Size ≤ 200 KB
                         </p>
                         <FormMessage />
                     </FormItem>
+
                     <Button type="submit">{mode === 'add' ? 'Add Section' : 'Save Changes'}</Button>
                 </form>
             </Form>
+
+            {/* Gallery Dialog */}
             <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
                 <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    {/* Uncomment when gallery ready */}
                     {/* <ImageGallery
-            onSelect={(image) => {
-              setSelectedImage(image);
-              setPreview(image.url);
-              form.setValue('imageId', image.id);
-              form.setValue('file', undefined);
-              setIsGalleryOpen(false);
-            }}
-          /> */}
+                        onSelect={(image) => {
+                            setSelectedImage(image);
+                            setPreview(image.url);
+                            form.setValue('imageId', image.id);
+                            form.setValue('file', undefined);
+                            setIsGalleryOpen(false);
+                        }}
+                    /> */}
                 </DialogContent>
             </Dialog>
         </>
     );
 }
 
-export type Section =  {
+export type Section = {
     id: string;
     name: string;
     description: string;
@@ -311,18 +332,18 @@ export type Section =  {
     appOnly: boolean;
     days: string[];
     image?: ImageType | null;
-    products?: ImageType[]; // One-to-many with products
-}
+    products?: ImageType[];
+};
 
 export default function Sections() {
     const [sections, setSections] = useState<Section[]>([]);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [editSection, setEditSection] = useState<Section | null>(null);
-    const [showAddFormDialog, setShowAddFormDialog] = useState(false)
+    const [showAddFormDialog, setShowAddFormDialog] = useState(false);
     const itemsPerPage = 10;
 
-    // Demo data (replace with actual data)
+    // Demo data
     useEffect(() => {
         let demoSections: Section[] = [
             {
@@ -333,9 +354,9 @@ export default function Sections() {
                 availableFrom: '00:00',
                 availableTo: '23:59',
                 appOnly: false,
-                days: daysOfWeek,
-                image: { id: '1', url: 'https://placehold.co/100x100?text=Sandwich', name: 'Sandwich', alt: 'Sandwich' },
-                products: [], // Add products here if needed
+                days: [...daysOfWeek], // ✅ FIX here
+                image: { id: '1', url: '', name: 'Sandwich', alt: 'Sandwich' },
+                products: [],
             },
             {
                 id: '2',
@@ -345,32 +366,8 @@ export default function Sections() {
                 availableFrom: '00:00',
                 availableTo: '23:59',
                 appOnly: false,
-                days: daysOfWeek,
-                image: { id: '2', url: 'https://placehold.co/100x100?text=Combo', name: 'Combo', alt: 'Combo' },
-                products: [],
-            },
-            {
-                id: '3',
-                name: 'Shawarma',
-                description: '',
-                priority: 7,
-                availableFrom: '00:00',
-                availableTo: '23:59',
-                appOnly: false,
-                days: daysOfWeek,
-                image: { id: '3', url: 'https://placehold.co/100x100?text=Shawarma', name: 'Shawarma', alt: 'Shawarma' },
-                products: [],
-            },
-            {
-                id: '4',
-                name: 'Appetizers',
-                description: '',
-                priority: 5,
-                availableFrom: '00:00',
-                availableTo: '23:59',
-                appOnly: false,
-                days: daysOfWeek,
-                image: { id: '4', url: 'https://placehold.co/100x100?text=Appetizers', name: 'Appetizers', alt: 'Appetizers' },
+                days: [...daysOfWeek],
+                image: { id: '2', url: '', name: 'Combo', alt: 'Combo' },
                 products: [],
             },
         ];
@@ -440,46 +437,33 @@ export default function Sections() {
 
     return (
         <div className="container mx-auto p-4">
-            {/* <h1 className="text-2xl font-bold mb-4">Sections</h1>
-      <p className="text-sm text-muted-foreground mb-4">
-        Note: • This is a cached service which refresh every 1 hour, therefore any changes you make here will reflect in customer app/web in approx 30-60 min
-      </p>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-        <div className="flex items-center space-x-2">
-          <label>Show</label>
-          <Input type="number" value={10} className="w-20" readOnly />
-          <label>entries</label>
-        </div>
-        <Input
-          placeholder="Search Section"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-1/4"
-        />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Add Section</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Section</DialogTitle>
-            </DialogHeader>
-            <SectionForm mode="add" onSubmit={handleAdd} />
-          </DialogContent>
-        </Dialog>
-      </div> */}
-            <Dialog open={showAddFormDialog} onOpenChange={() => { setShowAddFormDialog(false) }}  >
-
-                <DialogContent>
-                    <DialogHeader>
+            <Dialog open={showAddFormDialog} onOpenChange={() => { setShowAddFormDialog(false) }}>
+                <DialogContent >
+                 <div className="max-h-[calc(90vh-48px)] overflow-y-auto  ">
+                 <DialogHeader>
                         <DialogTitle>Add Section</DialogTitle>
                     </DialogHeader>
                     <SectionForm mode="add" onSubmit={handleAdd} />
+                 </div>
                 </DialogContent>
             </Dialog>
 
-            <TableContainerCard title="Sections" addButton addButtonText='Add Section' addButtonAction={() => { setShowAddFormDialog(true) }}  >
-                <SearchAndPaginationWrapper searchValue='' onSearchChange={() => { }} currentPage={1} totalItems={10} itemsPerPage={10} onPageChange={() => { }} onItemsPerPageChange={() => { }}>
+            <TableContainerCard
+                title="Sections"
+                addButton
+                addButtonText="Add Section"
+                addButtonAction={() => { setShowAddFormDialog(true) }}
+            >
+                <SearchAndPaginationWrapper
+                    searchValue={search}
+                    onSearchChange={(e) => setSearch(e)}
+                    currentPage={page}
+                    totalItems={sections.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setPage}
+                    onItemsPerPageChange={() => { }}
+                >
+                    {/* Desktop table */}
                     <div className="overflow-x-auto hidden md:block">
                         <table className="min-w-full border text-sm">
                             <thead className="bg-gray-100 text-left text-xs md:text-sm">
@@ -493,16 +477,13 @@ export default function Sections() {
                             </thead>
                             <tbody>
                                 {displayedSections.map((sec) => (
-                                    <tr
-                                        key={sec.id}
-                                        className="border-b hover:bg-gray-50 transition"
-                                    >
+                                    <tr key={sec.id} className="border-b hover:bg-gray-50 transition">
                                         <td className="px-3 py-2 border">
                                             {sec.image ? (
                                                 <Image
                                                     width={80}
                                                     height={80}
-                                                    src={sec.image.url}
+                                                    src={sec.image.url || ''}
                                                     alt={sec.name}
                                                     className="w-16 h-16 object-cover rounded"
                                                 />
@@ -510,13 +491,9 @@ export default function Sections() {
                                                 <span className="text-gray-400">—</span>
                                             )}
                                         </td>
-                                        <td className="px-3 py-2 border text-center">
-                                            {sec.name}
-                                        </td>
+                                        <td className="px-3 py-2 border text-center">{sec.name}</td>
                                         <td className="px-3 py-2 border">{sec.description}</td>
-                                        <td className="px-3 py-2 border text-center">
-                                            {sec.priority}
-                                        </td>
+                                        <td className="px-3 py-2 border text-center">{sec.priority}</td>
                                         <td className="px-3 py-2 border text-center">
                                             <Button variant="ghost" size="icon" onClick={() => setEditSection(sec)}>
                                                 <Pencil className="h-4 w-4" />
@@ -530,39 +507,35 @@ export default function Sections() {
                             </tbody>
                         </table>
                     </div>
-                    {/* ✅ Mobile-friendly stacked view */}
+
+                    {/* Mobile grid */}
                     <div className="grid gap-4 mt-6 md:hidden">
-                        {sections.map((sec, /* index*/) => (
-                            <div
-                                key={sec.id}
-                                className="border rounded-lg p-3 shadow-sm bg-white"
-                            >
+                        {sections.map((sec) => (
+                            <div key={sec.id} className="border rounded-lg p-3 shadow-sm bg-white">
                                 <div className="flex items-start justify-between">
                                     <Image
-                                        src={sec.image?.url ||  ''}
+                                        src={sec.image?.url || ''}
                                         alt="app banner"
                                         width={100}
                                         height={60}
                                         className="rounded object-cover"
                                     />
-                                    <div className='flex gap-0.5 items-center'>
-                                    <Button variant="ghost" size="icon" onClick={() => setEditSection(sec)}>
-                                        <FaRegEdit className="text-lg text-gray-600" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(sec.id)}>
-                                        <X className="text-lg text-gray-600" />
-                                    </Button>
+                                    <div className="flex gap-0.5 items-center">
+                                        <Button variant="ghost" size="icon" onClick={() => setEditSection(sec)}>
+                                            <FaRegEdit className="text-lg text-gray-600" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(sec.id)}>
+                                            <X className="text-lg text-gray-600" />
+                                        </Button>
                                     </div>
                                 </div>
                                 <div className="mt-2 text-sm space-y-1">
                                     <p>
-                                        <span className="font-medium">Priority:</span>{" "}
-                                        {sec.priority}
+                                        <span className="font-medium">Priority:</span> {sec.priority}
                                     </p>
                                     <p>
                                         <span className="font-medium">Item:</span> {sec.name}
                                     </p>
-                                    
                                 </div>
                             </div>
                         ))}
@@ -570,21 +543,17 @@ export default function Sections() {
                 </SearchAndPaginationWrapper>
             </TableContainerCard>
 
-
-
-            {/* Edit Dialog (opened when editSection is set) */}
+            {/* Edit Dialog */}
             <Dialog open={!!editSection} onOpenChange={() => setEditSection(null)}>
-                <DialogContent>
+                <DialogContent >
+                   <div className="max-h-[calc(90vh-48px)] overflow-y-auto  ">
                     <DialogHeader>
-                        <DialogTitle>Edit Section</DialogTitle>
-                    </DialogHeader>
-                    {editSection && (
-                        <SectionForm
-                            mode="edit"
-                            onSubmit={handleEdit}
-                            defaultValues={editSection}
-                        />
-                    )}
+                            <DialogTitle>Edit Section</DialogTitle>
+                        </DialogHeader>
+                        {editSection && (
+                            <SectionForm mode="edit" onSubmit={handleEdit} defaultValues={editSection} />
+                        )}
+                   </div>
                 </DialogContent>
             </Dialog>
         </div>
