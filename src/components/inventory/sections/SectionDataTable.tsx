@@ -345,7 +345,7 @@ export default function Sections() {
 
     // Demo data
     useEffect(() => {
-        let demoSections: Section[] = [
+        const demoSections: Section[] = [
             {
                 id: '1',
                 name: 'Sandwich',
