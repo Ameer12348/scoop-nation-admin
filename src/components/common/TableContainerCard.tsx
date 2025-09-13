@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 interface TableContainerCardProps {
@@ -7,6 +8,9 @@ interface TableContainerCardProps {
   desc?: string; // Description text
   addButton?: boolean; // Add button
   addButtonText?:string
+  addButtonAction?: () => void
+  addButtonClassName?: string
+  addButtonLink?:string
 }
 
 const TableContainerCard: React.FC<TableContainerCardProps> = ({
@@ -15,7 +19,10 @@ const TableContainerCard: React.FC<TableContainerCardProps> = ({
   className = "",
   desc = "",
   addButton = false,
-  addButtonText = 'Add'
+  addButtonText = 'Add',
+  addButtonAction,
+  addButtonClassName ='',
+  addButtonLink
 }) => {
   return (
     <div
@@ -34,9 +41,10 @@ const TableContainerCard: React.FC<TableContainerCardProps> = ({
           )}
         </div>
         {/* add button */}
-        {addButton && (
-          <button className="px-3 py-1 bg-brand-500 text-sm text-white rounded " > {addButtonText}</button>
-        )}
+        {addButton && addButtonLink ?  (
+          <Link href={addButtonLink} className={`px-3 py-1 bg-brand-500 text-sm text-white rounded ${addButtonClassName}`} > {addButtonText}</Link>
+        ) :           <button className={`px-3 py-1 bg-brand-500 text-sm text-white rounded ${addButtonClassName}`} onClick={addButtonAction} > {addButtonText}</button>
+}
       </div>
       
       {/* Card Body */}

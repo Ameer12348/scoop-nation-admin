@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Pencil, Trash } from 'lucide-react';
+import Image from 'next/image';
 
 // Sub-component: ImageForm (used for both add and edit popups)
 const addSchema = z.object({
@@ -144,7 +145,7 @@ function ImageForm({ mode, onSubmit, defaultValues }: ImageFormProps) {
                     <label htmlFor="file-upload" className="cursor-pointer">
                       <p>Drag and drop image here or click to select</p>
                     </label>
-                    {preview && <img src={preview} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
+                    {preview && <Image width={140} height={140} src={preview} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -159,7 +160,7 @@ function ImageForm({ mode, onSubmit, defaultValues }: ImageFormProps) {
 }
 
 // Sub-component: ImageCard
-interface Image {
+export interface ImageType {
   id: string;
   url: string;
   name: string;
@@ -167,15 +168,15 @@ interface Image {
 }
 
 interface ImageCardProps {
-  image: Image;
-  onOpenEdit: (image: Image) => void;
+  image: ImageType;
+  onOpenEdit: (image: ImageType) => void;
   onDelete: (id: string) => void;
 }
 
 function ImageCard({ image, onOpenEdit, onDelete }: ImageCardProps) {
   return (
     <div className="relative flex flex-col items-center border rounded-lg p-2 shadow-sm">
-      <img src={image.url} alt={image.alt} className="w-full h-32 object-cover mb-2" />
+      <Image width={140} height={140} src={image.url} alt={image.alt} className="w-full h-32 object-cover mb-2" />
       <p className="text-center font-medium">{image.name}</p>
       <div className="absolute top-2 right-2 flex gap-1 pt-1 pe-1">
         <button className='bg-transparent  text-sm border-none' onClick={() => onOpenEdit(image)}>
@@ -191,17 +192,17 @@ function ImageCard({ image, onOpenEdit, onDelete }: ImageCardProps) {
 
 // Main component: ImageGallery
 export default function ImageGallery() {
-  const [images, setImages] = useState<Image[]>([]);
+  const [images, setImages] = useState<ImageType[]>([]);
   const [search, setSearch] = useState('');
-  const [displayedImages, setDisplayedImages] = useState<Image[]>([]);
+  const [displayedImages, setDisplayedImages] = useState<ImageType[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [editImage, setEditImage] = useState<Image | null>(null);
+  const [editImage, setEditImage] = useState<ImageType | null>(null);
   const observerRef = useRef<HTMLDivElement>(null);
 
   // Demo data (replace with your actual project images)
   useEffect(() => {
-    const demoImages: Image[] = Array.from({ length: 50 }, (_, i) => ({
+    const demoImages: ImageType[] = Array.from({ length: 50 }, (_, i) => ({
       id: i.toString(),
       url: `https://placehold.co/200x200?text=Image${i + 1}`,
       name: `Image ${i + 1}`,
@@ -254,7 +255,7 @@ export default function ImageGallery() {
   const handleAdd = (data: AddFormData | EditFormData) => {
     const addData = data as AddFormData;
     const url = URL.createObjectURL(addData.file);
-    const newImage: Image = {
+    const newImage: ImageType = {
       id: Date.now().toString(),
       url,
       name: addData.name,

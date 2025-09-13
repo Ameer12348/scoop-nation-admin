@@ -178,21 +178,20 @@ export function BannerForm({ banner, onSubmit, onCancel }: {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">Create Banner</h2>
-                    <p className="text-sm text-muted-foreground">
+                    {/* <p className="text-sm text-muted-foreground">
                         {validity?.from && validity?.to
                             ? `${format(validity.from, 'dd/MM/yyyy')} - ${format(validity.to, 'dd/MM/yyyy')}`
                             : 'Select dates'}
-                    </p>
+                    </p> */}
                 </div>
-                <Select defaultValue="UTC+05:00-Asia/Karachi">
+                {/* <Select defaultValue="UTC+05:00-Asia/Karachi">
                     <SelectTrigger className="w-[180px]">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="UTC+05:00-Asia/Karachi">UTC+05:00 - Asia/Karachi</SelectItem>
-                        {/* Add more timezones */}
                     </SelectContent>
-                </Select>
+                </Select> */}
             </div>
 
             <Separator />
@@ -219,10 +218,10 @@ export function BannerForm({ banner, onSubmit, onCancel }: {
                                         {validity?.from ? (
                                             validity?.to ? (
                                                 <>
-                                                    {format(validity.from, "PPP")} - {format(validity.to, "PPP")}
+                                                    {format(validity.from, "PP")} - {format(validity.to, "PP")}
                                                 </>
                                             ) : (
-                                                format(validity.from, "PPP")
+                                                format(validity.from, "PP")
                                             )
                                         ) : (
                                             <span>Pick a date range</span>

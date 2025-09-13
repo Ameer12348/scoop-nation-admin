@@ -26,6 +26,7 @@ type NavItem = {
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
+import { FaList } from "react-icons/fa";
 
 const navItems: NavItem[] = [
   {
@@ -67,12 +68,21 @@ const navItems: NavItem[] = [
       { name: "404 Error", path: "/error-404",  },
     ],
   },
+  {
+    icon: <FaList />,
+    name: "Inventory",
+    subItems: [
+      { name: "Sections", path: "/sections",  },
+      {name:'Items Management',path:'/items-management'},
+      {name:'Gallery',path:'/gallery'},
+    ],
+  },
 ];
 
 const othersItems: NavItem[] = [
   {
     icon: <PieChartIcon />,
-    name: "Charts",
+    name: "Charts", 
     subItems: [
       { name: "Line Chart", path: "/line-chart",  },
       { name: "Bar Chart", path: "/bar-chart",  },
@@ -303,7 +313,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-2.5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-[57px] flex flex-col lg:mt-0 top-0 px-2.5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? "w-[250px]"
