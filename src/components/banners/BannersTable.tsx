@@ -111,7 +111,7 @@ export default function BannerTable() {
                   <td className="px-3 py-2 border">{item.itemName}</td>
                   <td className="px-3 py-2 border">
                     <div className="flex items-center gap-2">
-                    <Switch label={item.active ? "Active" : "In-Active"} defaultChecked={item.active} onChange={(checked) => toggleActive(item.id)} />
+                    <Switch label={item.active ? "Active" : "In-Active"} defaultChecked={item.active} onChange={(/*checked*/) => toggleActive(item.id)} />
 
                     </div>
                   </td>
@@ -128,7 +128,7 @@ export default function BannerTable() {
 
         {/* ✅ Mobile-friendly stacked view */}
         <div className="grid gap-4 mt-6 md:hidden">
-          {data.map((item,index) => (
+          {data.map((item, /* index*/) => (
             <div
               key={item.id}
               className="border rounded-lg p-3 shadow-sm bg-white"
@@ -155,7 +155,7 @@ export default function BannerTable() {
                 </p>
                 <div className="flex items-center gap-2">
                   
-                  <Switch label={item.active ? "Active" : "In-Active"} defaultChecked={item.active} onChange={(checked) => toggleActive(item.id)} />
+                  <Switch label={item.active ? "Active" : "In-Active"} defaultChecked={item.active} onChange={( /* checked */) => toggleActive(item.id)} />
                 </div>
               </div>
             </div>

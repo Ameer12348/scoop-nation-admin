@@ -5,14 +5,13 @@ import { useState } from 'react';
 
 // Define the Banner type if not already imported
 interface Banner {
-  id?: string;
+  id?: string | number;
   validity: { from: Date; to: Date };
   startTime: string;
   endTime: string;
   priority: number;
   linkItem?: string;
   branches: string[];
-  languages: string[];
   appBannerImage?: File | null;
   appBannerPreview?: string;
   webBannerImage?: File | null;
@@ -31,15 +30,14 @@ const existingBanner: Partial<Banner> = {
   priority: 2,
   linkItem: '1', // e.g., item ID
   branches: ['1', '2'],
-  languages: ['en', 'ur'],
   appBannerPreview: '/path/to/preview-app.jpg', // Base64 or URL for preview
   webBannerPreview: '/path/to/preview-web.jpg',
 };
 
 export default function BannerPage() {
-  const [isEditing, setIsEditing] = useState(false); // Toggle between create/edit
+  const [isEditing,/* setIsEditing*/] = useState(false); // Toggle between create/edit
 
-  const handleSubmit = (data: Banner):void => {
+  const handleSubmit = (data: Banner) => {
     console.log('Banner submitted:', data);
     // Here: API call to save/update banner
     // e.g., await api.banners.create(data) or update(data)

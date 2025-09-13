@@ -1,6 +1,6 @@
 'use client'
 import TableContainerCard from '@/components/common/TableContainerCard'
-import PageBreadcrumb from '@/components/common/PageBreadCrumb'
+// import PageBreadcrumb from '@/components/common/PageBreadCrumb'
 import React from 'react'
 import SearchAndPaginationWrapper from '@/components/common/SearchAndPaginationWrapper'
 import BannersTable from '@/components/banners/BannersTable'
