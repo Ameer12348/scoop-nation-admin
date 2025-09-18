@@ -35,6 +35,23 @@ const navItems: NavItem[] = [
     subItems: [{ name: "Ecommerce", path: "/",  }],
   },
   {
+    icon: <FaList />,
+    name: "Inventory",
+    subItems: [
+      { name: "Sections", path: "/sections",  },
+      {name:'Items Management',path:'/items-management'},
+      {name:'Gallery',path:'/gallery'},
+      {name:'Orders',path:'/orders'},
+    ],
+  },
+  {
+    icon: <IoSettingsSharp />,
+    name: "Settings",
+    subItems: [
+      { name: "Banners", path: "/banners",  },
+    ],
+  },
+  {
     icon: <FaUsers size={24} />,
     name: "Users",
     path: "/users",
@@ -68,15 +85,7 @@ const navItems: NavItem[] = [
       { name: "404 Error", path: "/error-404",  },
     ],
   },
-  {
-    icon: <FaList />,
-    name: "Inventory",
-    subItems: [
-      { name: "Sections", path: "/sections",  },
-      {name:'Items Management',path:'/items-management'},
-      {name:'Gallery',path:'/gallery'},
-    ],
-  },
+ 
 ];
 
 const othersItems: NavItem[] = [
@@ -98,13 +107,6 @@ const othersItems: NavItem[] = [
       { name: "Buttons", path: "/buttons",  },
       { name: "Images", path: "/images",  },
       { name: "Videos", path: "/videos",  },
-    ],
-  },
-  {
-    icon: <IoSettingsSharp />,
-    name: "Settings",
-    subItems: [
-      { name: "Banners", path: "/banners",  },
     ],
   },
   {
