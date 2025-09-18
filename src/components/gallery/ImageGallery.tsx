@@ -171,11 +171,12 @@ interface ImageCardProps {
   image: ImageType;
   onOpenEdit: (image: ImageType) => void;
   onDelete: (id: string) => void;
+  className?:string
 }
 
-function ImageCard({ image, onOpenEdit, onDelete }: ImageCardProps) {
+function ImageCard({ image, onOpenEdit, onDelete ,className}: ImageCardProps) {
   return (
-    <div className="relative flex flex-col items-center border rounded-lg p-2 shadow-sm">
+    <div className={`relative flex flex-col items-center border rounded-lg p-2 shadow-sm ${className}`}>
       <Image width={140} height={140} src={image.url} alt={image.alt} className="w-full h-32 object-cover mb-2" />
       <p className="text-center font-medium">{image.name}</p>
       <div className="absolute top-2 right-2 flex gap-1 pt-1 pe-1">
@@ -300,9 +301,9 @@ export default function ImageGallery() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className=" flex justify-center flex-wrap  items-start gap-4">
         {displayedImages.map((img) => (
-          <ImageCard key={img.id} image={img} onOpenEdit={setEditImage} onDelete={handleDelete} />
+          <ImageCard key={img.id} image={img} onOpenEdit={setEditImage} onDelete={handleDelete} className='max-w-[300px]' />
         ))}
       </div>
       <div ref={observerRef} className="h-10 mt-4 flex justify-center items-center">

@@ -409,7 +409,7 @@ export function BannerForm({ banner, onSubmit, onCancel }: {
                     <Button type="button" variant="outline" onClick={onCancel}>
                         Cancel
                     </Button>
-                    <Button type="submit">Apply</Button>
+                    <Button type="submit">Save</Button>
                 </div>
             </form>
 

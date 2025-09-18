@@ -2,7 +2,7 @@
 import React from 'react';
 import ProductDataTable from '@/components/inventory/products/ProductDataTable';
 
-export default function ItemManagementPage() {
+export default function ItemsManagementPage() {
   return (
     <div className="p-4 md:p-6 2xl:p-10">
       <div className="mx-auto">
