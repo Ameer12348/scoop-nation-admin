@@ -19,6 +19,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import type { User } from "@/types/UsersTypes";
+import TableContainerCard from "../common/TableContainerCard";
+import SearchAndPaginationWrapper from "../common/SearchAndPaginationWrapper";
 
 interface UsersDashboardProps {
   initialUsers: User[];
@@ -39,34 +41,91 @@ const filterSchema = z.object({
 
 type FilterForm = z.infer<typeof filterSchema>;
 
-function DataTable({ columns, data }: { columns: any[]; data: User[] }) {
+
+function UsersTable({ data }: { data: User[] }) {
   return (
-    <div className="rounded-md border bg-white">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell key={column.accessorKey || column.id} className="w-[100px] border-b">
-                {column.header}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((row, index) => (
-            <TableRow key={index} className="border-b">
-              {columns.map((column) => (
-                <TableCell key={column.accessorKey || column.id} className="border-r py-2">
-                  {column.cell ? column.cell({ row }) : row[column.accessorKey as keyof User]}
-                </TableCell>
-              ))}
-            </TableRow>
+    <div className="overflow-x-auto ">
+      <table className="min-w-full border text-sm">
+        <thead className="bg-gray-100 text-left text-xs md:text-sm">
+          <tr>
+            <th className="px-3 py-2 border">FULL NAME	</th>
+            <th className="px-3 py-2 border">PHONE NO	</th>
+            <th className="px-3 py-2 border">EMAIL ADDRESS		</th>
+            <th className="px-3 py-2 border">TOTAL ORDERS	</th>
+            <th className="px-3 py-2 border">TOTAL REVENUE	</th>
+            <th className="px-3 py-2 border">FIRST ORDERED AT	</th>
+            <th className="px-3 py-2 border">LAST ORDERED AT	</th>
+            <th className="px-3 py-2 border">SOCIAL PLATFORM	</th>
+            <th className="px-3 py-2 border">BLACKLIST ACTION	</th>
+            <th className="px-3 py-2 border">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row) => (
+            <tr key={row.id} className="border-b hover:bg-gray-50 transition">
+              {/* full name */}
+              <td className="px-3 py-2 border text-center">
+                <div className="flex items-center space-x-2">
+                  <FaUser className="h-4 w-4 text-gray-400" />
+                  <span>{row.fullName ?? 'N/A'}</span>
+                </div>
+              </td>
+              {/* phone no */}
+              <td className="px-3 py-2 border text-center">
+                <div className="flex items-center space-x-1">
+                  <FaWhatsapp className="h-3 w-3 text-green-500" />
+                  <span>{row.phone ?? 'N/A'}</span>
+                </div>
+              </td>
+              {/* email address */}
+              <td className="px-3 py-2 border text-center">
+                <div className="flex items-center space-x-1">
+                  <FaEnvelope className="h-3 w-3 text-gray-400" />
+                  <span className="truncate max-w-xs">{row.email ?? 'N/A'}</span>
+                </div>
+              </td>
+              {/* total orders */}
+              <td className="px-3 py-2 border text-center">
+                <span>{row.totalOrders ?? 0}</span>
+              </td>
+              {/* total revenue */}
+              <td className="px-3 py-2 border text-center">
+                <span>PKR {(row.totalRevenue ?? 0).toFixed(2)}</span>
+              </td>
+              {/* first ordered at  */}
+              <td className="px-3 py-2 border text-center">
+                {row.firstOrderedAt ? format(row.firstOrderedAt, "dd MMM yyyy") : 'N/A'}
+              </td>
+              {/* last ordered at */}
+              <td className="px-3 py-2 border text-center">
+                {row.lastOrderedAt ? format(row.lastOrderedAt, "dd MMM yyyy") : 'N/A'}
+              </td>
+              {/* social platform */}
+              <td className="px-3 py-2 border text-center">
+                <Badge variant="secondary">{row.socialPlatform ?? 'Local Signup'}</Badge>               </td>
+              {/* blacklist action */}
+              <td className="px-3 py-2 border text-center">
+                <div className="flex space-x-1">
+                  <Button variant="outline" size="sm" className="p-1 h-6">
+                    <FaTimes className="h-3 w-3 text-red-500" />
+                  </Button>
+                  <Badge variant={row.blacklist ? "destructive" : "default"} className="text-xs">No</Badge>
+                </div>
+              </td>
+              {/* actions */}
+              <td className="px-3 py-2 border text-center">
+                <Button variant="ghost" size="sm" className="p-1">
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </div>
   );
 }
+
 
 function MoreFiltersModal({ open, onOpenChange, onApply }: { open: boolean; onOpenChange: (open: boolean) => void; onApply: (filters: FilterForm) => void }) {
   const form = useForm<FilterForm>({
@@ -129,7 +188,7 @@ function MoreFiltersModal({ open, onOpenChange, onApply }: { open: boolean; onOp
           </div>
           <div className="space-y-2">
             <Label>Cities</Label>
-            <Select  onValueChange={(values) => form.setValue("cities", [values])}>
+            <Select onValueChange={(values) => form.setValue("cities", [values])}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -141,7 +200,7 @@ function MoreFiltersModal({ open, onOpenChange, onApply }: { open: boolean; onOp
           </div>
           <div className="space-y-2">
             <Label>Locations (Areas)</Label>
-            <Select  onValueChange={(values) => form.setValue("locations", [values])}>
+            <Select onValueChange={(values) => form.setValue("locations", [values])}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -152,7 +211,7 @@ function MoreFiltersModal({ open, onOpenChange, onApply }: { open: boolean; onOp
           </div>
           <div className="space-y-2">
             <Label>Sections</Label>
-            <Select  onValueChange={(values) => form.setValue("sections", [values])}>
+            <Select onValueChange={(values) => form.setValue("sections", [values])}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -163,7 +222,7 @@ function MoreFiltersModal({ open, onOpenChange, onApply }: { open: boolean; onOp
           </div>
           <div className="space-y-2">
             <Label>Items</Label>
-            <Select  onValueChange={(values) => form.setValue("items", [values])}>
+            <Select onValueChange={(values) => form.setValue("items", [values])}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -316,12 +375,25 @@ export function UsersDashboard({ initialUsers }: UsersDashboardProps) {
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex justify-end mb-4">
-          <Button variant="outline" onClick={() => setShowMoreFilters(true)}>
-            More Filters
-          </Button>
-        </div>
-        <DataTable columns={columns} data={usersData} />
+
+        <TableContainerCard
+          title="Orders"
+          addButton
+          addButtonText="More Filters"
+          addButtonAction={() => { setShowMoreFilters(true) }}
+        >
+          <SearchAndPaginationWrapper
+            searchValue={''}
+            onSearchChange={() => { }}
+            currentPage={1}
+            totalItems={10}
+            itemsPerPage={10}
+            onPageChange={() => { }}
+            onItemsPerPageChange={() => { }}
+          >
+            <UsersTable data={usersData} />
+          </SearchAndPaginationWrapper>
+        </TableContainerCard>
       </div>
 
       <MoreFiltersModal open={showMoreFilters} onOpenChange={setShowMoreFilters} onApply={handleApplyFilters} />
