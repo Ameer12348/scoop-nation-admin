@@ -796,7 +796,7 @@ export function OrdersDashboard({ initialOrders }: OrdersDashboardProps) {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6 bg-purple-50 min-h-screen"> {/* Main layout container with purple bg */}
+    <div className=" space-y-6 bg-purple-50 min-h-screen"> {/* Main layout container with purple bg */}
       <TableContainerCard
         title="Orders"
         addButton

@@ -174,7 +174,7 @@ export default function ProductDataTable() {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="">
             {/* Add Product Dialog */}
             <Dialog open={showAddFormDialog} onOpenChange={() => { setShowAddFormDialog(false) }}>
                 <DialogContent className='p-0  min-w-[98vw] sm:min-w-[90vw] md:min-w-[700px] lg:min-w-[900px]'>

@@ -357,7 +357,7 @@ export function UsersDashboard({ initialUsers }: UsersDashboardProps) {
   ];
 
   return (
-    <div className="container mx-auto p-4 space-y-6 bg-purple-50 min-h-screen">
+    <div className="  space-y-6 bg-purple-50 min-h-screen">
       <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
         <div>
           <div className="text-xs text-gray-500 mb-1">UTC+05:00 Asia/Karachi</div>

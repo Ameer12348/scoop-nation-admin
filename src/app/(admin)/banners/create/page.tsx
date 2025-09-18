@@ -51,7 +51,7 @@ export default function BannerPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className=" py-10">
       <BannerForm
         banner={isEditing ? existingBanner : initialBanner}
         onSubmit={handleSubmit}
