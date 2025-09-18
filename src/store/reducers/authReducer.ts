@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Define the initial state type
-interface CounterState {
+interface AuthState {
+  user:null
 }
 
-const initialState: CounterState = {
+const initialState: AuthState = {
+  user:null
 };
 
 const authSlice = createSlice({
