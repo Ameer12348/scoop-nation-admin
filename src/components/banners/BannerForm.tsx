@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from 'date-fns';
 import { z } from 'zod';
-import { CalendarIcon, ClockIcon, LinkIcon, MapPinIcon, ImageIcon, SettingsIcon } from 'lucide-react';
+import { CalendarIcon, ClockIcon, LinkIcon, MapPinIcon, ImageIcon, SettingsIcon, Loader } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,8 @@ interface Banner {
     priority: number;
     linkItem?: string;
     branches: string[];
+    name: string;
+    description: string;
     appBannerImage?: File | null;
     appBannerPreview?: string;
     webBannerImage?: File | null;
@@ -51,6 +53,8 @@ interface Item {
 }
 
 const schema = z.object({
+    name: z.string().min(1, 'Name is required'),
+    description: z.string().min(1, 'Description is required'),
     validity: z.object({
         from: z.date(),
         to: z.date(),
@@ -82,10 +86,11 @@ const mockItems: Item[] = [
     // Add more as needed
 ];
 
-export function BannerForm({ banner, onSubmit, onCancel }: {
+export function BannerForm({ banner, onSubmit, onCancel, loading }: {
     banner?: Partial<Banner>;
     onSubmit: (data: Banner) => void;
     onCancel: () => void;
+    loading?: boolean;
 }) {
     const form = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -96,6 +101,8 @@ export function BannerForm({ banner, onSubmit, onCancel }: {
             priority: 1,
             branches: [],
             linkItem: '',
+            name:'',
+            description:'',
             ...banner,
         },
     });
@@ -197,6 +204,7 @@ export function BannerForm({ banner, onSubmit, onCancel }: {
             <Separator />
 
             <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+
                 {/* Banner Validity */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -244,6 +252,31 @@ export function BannerForm({ banner, onSubmit, onCancel }: {
                 </Card>
 
                 {/* Times and Priority */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="startTime">Name</Label>
+                        <div className="relative">
+                            <Input
+                                id="name"
+                                type="text"
+                                {...register('name')}
+                            />
+                        </div>
+                        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="endTime">Description</Label>
+                        <div className="relative">
+                            <Input
+                                id="description"
+                                type="text"
+                                {...register('description')}
+                            />
+                        </div>
+                        {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+                    </div>
+                    
+                </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="space-y-2">
                         <Label htmlFor="startTime">Start Time</Label>
@@ -409,7 +442,9 @@ export function BannerForm({ banner, onSubmit, onCancel }: {
                     <Button type="button" variant="outline" onClick={onCancel}>
                         Cancel
                     </Button>
-                    <Button type="submit">Save</Button>
+                    <Button type="submit" disabled={loading}>
+                        {loading ? <Loader className="h-4 w-4 animate-spin" /> : 'Save'}
+                    </Button>
                 </div>
             </form>
 
