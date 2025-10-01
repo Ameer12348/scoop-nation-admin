@@ -51,6 +51,11 @@ interface BannerState {
     loading:boolean,
     error:null | string,
   };
+  createBanner:{
+    loading:boolean,
+    error:null | string,
+    bannerId: string | null,
+  };
   loading: boolean;
   error: string | null;
 }
@@ -66,6 +71,11 @@ const initialState: BannerState = {
   updateBanner:{
     loading:false,
     error:null,
+  },
+  createBanner:{
+    loading:false,
+    error:null,
+    bannerId: null,
   },
   loading: false,
   error: null,
@@ -116,6 +126,40 @@ interface UpdateBannerPayload {
   end_date: string;
   is_active: boolean;
 }
+
+// Interface for create banner payload
+interface CreateBannerPayload {
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+}
+
+// Create async thunk for creating a banner
+export const createBanner = createAsyncThunk(
+  'banners/createBanner',
+  async (bannerData: CreateBannerPayload, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/api/banners/create', bannerData);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to create banner');
+      }
+      
+      // Show success toast
+      toast.success(response.data.message || 'Banner created successfully');
+      
+      return response.data.data; // Returns the new banner ID
+    } catch (error) {
+      // Show error toast
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      toast.error(errorMessage);
+      
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 
 // Create async thunk for updating a banner
 export const updateBanner = createAsyncThunk(
@@ -194,6 +238,21 @@ const bannerSlice = createSlice({
       .addCase(updateBanner.rejected, (state, action) => {
         state.updateBanner.loading = false;
         state.updateBanner.error = action.payload as string;
+      })
+      
+      // Handle createBanner
+      .addCase(createBanner.pending, (state) => {
+        state.createBanner.loading = true;
+        state.createBanner.error = null;
+        state.createBanner.bannerId = null;
+      })
+      .addCase(createBanner.fulfilled, (state, action: PayloadAction<string>) => {
+        state.createBanner.loading = false;
+        state.createBanner.bannerId = action.payload;
+      })
+      .addCase(createBanner.rejected, (state, action) => {
+        state.createBanner.loading = false;
+        state.createBanner.error = action.payload as string;
       });
   },
 });
@@ -207,3 +266,4 @@ export const selectBanners = (state: { banners: BannerState }) => state.banners.
 export const selectCurrentBanner = (state: { banners: BannerState }) => state.banners.currentBanner;
 export const selectBannersLoading = (state: { banners: BannerState }) => state.banners.loading;
 export const selectBannersError = (state: { banners: BannerState }) => state.banners.error;
+export const selectCreateBanner = (state: { banners: BannerState }) => state.banners.createBanner;

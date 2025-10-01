@@ -6,7 +6,7 @@ import { BannerForm } from "./BannerForm";
 import { useRouter } from "next/navigation";
 
 const EditBanner = ({ id }: { id: string }) => {
-  const { currentBanner, fetchBannerById, updateBanner, } = useBanners();
+  const { currentBanner, fetchBannerById, updateBannerAction, } = useBanners();
   const {loading:updateBannerLoading} = useAppSelector(x=>x.banners.updateBanner)
   const router = useRouter();
   useEffect(() => {
@@ -61,7 +61,7 @@ const EditBanner = ({ id }: { id: string }) => {
             console.log(data);
             
             
-            updateBanner({
+            updateBannerAction({
               id:Number(id),
               name:data.name,
               description:data.description,

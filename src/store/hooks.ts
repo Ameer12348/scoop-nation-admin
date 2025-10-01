@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import type { TypedUseSelectorHook } from 'react-redux'
 import type { RootState, AppDispatch } from './index'
 import { setShowAuthDialog, setAuthTab, setIsLoggedIn, logout, clearError, loginAdmin, registerUser, setAuthFromStorage } from './slices/authSlice'
-import { fetchBanners, fetchBannerById, updateBanner, clearBannerError, selectBanners, selectCurrentBanner, selectBannersLoading, selectBannersError } from './slices/bannerSlice'
+import { fetchBanners, fetchBannerById, updateBanner, createBanner, clearBannerError, selectBanners, selectCurrentBanner, selectBannersLoading, selectBannersError, selectCreateBanner } from './slices/bannerSlice'
 
 export const useAppDispatch: () => AppDispatch = useDispatch
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
@@ -11,6 +11,7 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 export const useBanners = () => {
   const banners = useAppSelector(selectBanners);
   const currentBanner = useAppSelector(selectCurrentBanner);
+  const createBannerState = useAppSelector(selectCreateBanner);
   const loading = useAppSelector(selectBannersLoading);
   const error = useAppSelector(selectBannersError);
   const dispatch = useAppDispatch();
@@ -19,14 +20,17 @@ export const useBanners = () => {
     // State
     banners,
     currentBanner,
+    createBanner: createBannerState,
     loading,
     error,
     
     // Actions
     fetchBanners: () => dispatch(fetchBanners()),
     fetchBannerById: (id: string) => dispatch(fetchBannerById(id)),
-    updateBanner: (bannerData: { id: number, name: string, description: string, start_date: string, end_date: string, is_active: boolean }) => 
+    updateBannerAction: (bannerData: { id: number, name: string, description: string, start_date: string, end_date: string, is_active: boolean }) => 
       dispatch(updateBanner(bannerData)),
+    createBannerAction: (bannerData: { name: string, description: string, start_date: string, end_date: string, is_active: boolean }) => 
+      dispatch(createBanner(bannerData)),
     clearError: () => dispatch(clearBannerError()),
   };
 }
