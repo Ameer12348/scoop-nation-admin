@@ -1,12 +1,10 @@
-import EditBanner from "@/components/banners/EditBanner"
+import EditBanner from "@/components/banners/EditBanner";
 
-const page = ({params}:{params:{id:string}}) => {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <div>
-        <EditBanner id={params.id} />
-
+      <EditBanner id={id} />
     </div>
-  )
+  );
 }
-
-export default page
