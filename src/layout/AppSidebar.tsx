@@ -5,17 +5,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
   ChevronDownIcon,
   GridIcon,
-  HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
+  HorizontaLDots,  
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 import { FaUsers } from "react-icons/fa";
@@ -26,8 +18,8 @@ type NavItem = {
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
-import { FaList } from "react-icons/fa";
-
+import { FaList, } from "react-icons/fa";
+import { FaCartShopping } from "react-icons/fa6";
 const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
@@ -41,7 +33,6 @@ const navItems: NavItem[] = [
       { name: "Sections", path: "/sections",  },
       {name:'Items Management',path:'/items-management'},
       {name:'Gallery',path:'/gallery'},
-      {name:'Orders',path:'/orders'},
     ],
   },
   {
@@ -52,7 +43,12 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <FaUsers size={24} />,
+    icon: <FaCartShopping size={16} />,
+    name: "Orders",
+    path: "/orders",
+  },
+  {
+    icon: <FaUsers size={16} />,
     name: "Users",
     path: "/users",
   },
@@ -280,7 +276,7 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <Image
+              {/* <Image
                 className="dark:hidden"
                 src="/images/logo/logo.svg"
                 alt="Logo"
@@ -293,7 +289,8 @@ const AppSidebar: React.FC = () => {
                 alt="Logo"
                 width={150}
                 height={40}
-              />
+              /> */}
+              <h3 className="text-lg font-bold">Scoop Nation</h3>
             </>
           ) : (
             <Image

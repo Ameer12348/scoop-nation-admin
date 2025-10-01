@@ -4,6 +4,7 @@ import './globals.css';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import Providers from './Providers';
+import InitializeData from '@/components/auth/InitializeData';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -20,6 +21,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Providers>
             <SidebarProvider>{children}</SidebarProvider>
+            <InitializeData/>
           </Providers>
         </ThemeProvider>
       </body>
