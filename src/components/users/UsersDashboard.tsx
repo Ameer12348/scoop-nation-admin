@@ -66,7 +66,7 @@ function UsersTable({ data }: { data: Customer[] }) {
             <th className="px-3 py-2 border whitespace-nowrap">TOTAL REVENUE	</th>
             <th className="px-3 py-2 border whitespace-nowrap">FIRST ORDERED AT	</th>
             <th className="px-3 py-2 border whitespace-nowrap">LAST ORDERED AT	</th>
-            <th className="px-3 py-2 border whitespace-nowrap">SOCIAL PLATFORM	</th>
+            {/* <th className="px-3 py-2 border whitespace-nowrap">SOCIAL PLATFORM	</th> */}
             <th className="px-3 py-2 border whitespace-nowrap">BLACKLIST ACTION	</th>
             <th className="px-3 py-2 border whitespace-nowrap">ACTION</th>
           </tr>
@@ -76,21 +76,21 @@ function UsersTable({ data }: { data: Customer[] }) {
             <tr key={row.id} className="border-b hover:bg-gray-50 transition">
               {/* full name */}
               <td className="px-3 py-2 border text-center">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2  whitespace-nowrap">
                   <span>{row.fullname ?? 'N/A'}</span>
                 </div>
               </td>
               {/* phone no */}
               <td className="px-3 py-2 border text-center">
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-1  whitespace-nowrap">
                   <FaWhatsapp className="h-3 w-3 text-green-500" />
                   <span>{row.phone ?? 'N/A'}</span>
                 </div>
               </td>
               {/* email address */}
               <td className="px-3 py-2 border text-center">
-                <div className="flex items-center space-x-1">
-                  <FaEnvelope className="h-3 w-3 text-gray-400" />
+                <div className="flex items-center space-x-1  whitespace-nowrap">
+                  <FaEnvelope className="h-3 w-3 text-gray-400 " />
                   <a href={`mailto:${row.email}`}  className="truncate max-w-xs">{row.email ?? 'N/A'}</a >
                 </div>
               </td>
@@ -99,23 +99,23 @@ function UsersTable({ data }: { data: Customer[] }) {
                 <span>{row.total_orders ?? 0}</span>
               </td>
               {/* total revenue */}
-              <td className="px-3 py-2 border text-center">
+              <td className="px-3 py-2 border text-center  whitespace-nowrap">
                 <span>PKR {(  parseFloat(row.total_revenue) ?? 0).toFixed(2)}</span>
               </td>
               {/* first ordered at  */}
-              <td className="px-3 py-2 border text-center">
+              <td className="px-3 py-2 border text-center  whitespace-nowrap">
                 {row.first_ordered_at ? format(row.first_ordered_at, "dd MMM yyyy") : 'N/A'}
               </td>
               {/* last ordered at */}
-              <td className="px-3 py-2 border text-center">
+              <td className="px-3 py-2 border text-center  whitespace-nowrap">
                 {row.last_ordered_at ? format(row.last_ordered_at, "dd MMM yyyy") : 'N/A'}
               </td>
               {/* social platform */}
-              <td className="px-3 py-2 border text-center">
-                {/* <Badge variant="secondary">{row.socialPlatform ?? 'Local Signup'}</Badge>                */}
-              </td>
+              {/* <td className="px-3 py-2 border text-center  whitespace-nowrap">
+                <Badge variant="secondary">{row.socialPlatform ?? 'Local Signup'}</Badge>               
+              </td> */}
               {/* blacklist action */}
-              <td className="px-3 py-2 border text-center">
+              <td className="px-3 py-2 border text-center  whitespace-nowrap">
                 <div className="flex space-x-1">
                   <Button variant="outline" size="sm" className="p-1 h-6">
                     <FaTimes className="h-3 w-3 text-red-500" />
