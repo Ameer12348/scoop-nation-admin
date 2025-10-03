@@ -9,11 +9,16 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
-  images: {
+ images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
+        hostname: '**',
+      },
+      // Optionally add this for HTTP support (less common and less secure)
+      {
+        protocol: 'http',
+        hostname: '**',
       },
     ],
   },

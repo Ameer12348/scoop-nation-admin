@@ -30,21 +30,18 @@ interface UsersDashboardProps {
   initialUsers: User[];
 }
 
-const filterSchema = z.object({
-  fullname: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().optional(),
-  minOrders: z.number().optional(),
-  maxOrders: z.number().optional(),
-  minRevenue: z.number().optional(),
-  maxRevenue: z.number().optional(),
-  validity: z.object({
-    from: z.date().optional(),
-    to: z.date().optional(),
-  }).optional(),
-});
+type FilterForm = {
+  fullname?: string;
+  phone?: string;
+  email?: string;
+  minOrders?: number;
+  maxOrders?: number;
+  minRevenue?: number;
+  maxRevenue?: number;
+  dateFrom?: string;
+  dateTo?: string;
+}
 
-type FilterForm = z.infer<typeof filterSchema>;
 
 
 function UsersTable({ data }: { data: Customer[] }) {
@@ -153,9 +150,10 @@ function UsersTable({ data }: { data: Customer[] }) {
 }
 
 
-function MoreFiltersModal({ open, onOpenChange, onApply ,form}: { open: boolean; onOpenChange: (open: boolean) => void; onApply: (filters: FilterForm) => void; form: UseFormReturn<FilterForm> }) {
-  const handleSubmit = (data: FilterForm) => {
-    onApply(data);
+function MoreFiltersModal({ open, onOpenChange,onApply, setFilterForm ,filterForm}: { open: boolean; onOpenChange: (open: boolean) => void; onApply: (filters: FilterForm) => void; setFilterForm: (form: FilterForm) => void; filterForm: FilterForm }) {
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    onApply(filterForm);
     onOpenChange(false);
   };
 
@@ -165,14 +163,15 @@ function MoreFiltersModal({ open, onOpenChange, onApply ,form}: { open: boolean;
         <SheetHeader>
           <DialogTitle>More Filters</DialogTitle>
         </SheetHeader>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 overflow-y-auto flex-grow px-4">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-grow px-4">
           {/* Full Name */}
           <div className="space-y-2">
             <Label htmlFor="fullname">Full Name</Label>
             <Input
               id="fullname"
               placeholder="Enter full name"
-              {...form.register("fullname")}
+              value={filterForm.fullname}
+              onChange={(e) => setFilterForm({ ...filterForm, fullname: e.target.value })}
             />
           </div>
 
@@ -182,7 +181,8 @@ function MoreFiltersModal({ open, onOpenChange, onApply ,form}: { open: boolean;
             <Input
               id="phone"
               placeholder="Enter phone number"
-              {...form.register("phone")}
+              value={filterForm.phone}
+              onChange={(e) => setFilterForm({ ...filterForm, phone: e.target.value })}
             />
           </div>
 
@@ -192,41 +192,45 @@ function MoreFiltersModal({ open, onOpenChange, onApply ,form}: { open: boolean;
             <Input
               id="email"
               placeholder="Enter email address"
-              {...form.register("email")}
+              value={filterForm.email}
+              onChange={(e) => setFilterForm({ ...filterForm, email: e.target.value })}
             />
           </div>
 
           {/* Total Orders Range */}
-          {/* <div className="grid grid-cols-2 gap-2 ">
+          <div className="grid grid-cols-2 gap-2 ">
             <div className="space-y-2">
               <Label htmlFor="minOrders">Min Orders</Label>
               <Input
                 id="minOrders"
                 type="number"
                 placeholder="0"
-                {...form.register("minOrders", { valueAsNumber: true })}
+                value={filterForm.minOrders}
+                onChange={(e) => setFilterForm({ ...filterForm, minOrders: e.target.valueAsNumber })}
               />
+
             </div>
             <div className="space-y-2">
               <Label htmlFor="maxOrders">Max Orders</Label>
               <Input
                 id="maxOrders"
                 type="number"
-                placeholder="∞"
-                {...form.register("maxOrders", { valueAsNumber: true })}
+                value={filterForm.maxOrders}
+                onChange={(e) => setFilterForm({ ...filterForm, maxOrders: e.target.valueAsNumber })}
               />
             </div>
-          </div> */}
+          </div>
 
           {/* Total Revenue Range */}
-          {/* <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <div className="space-y-2">
               <Label htmlFor="minRevenue">Min Revenue (PKR)</Label>
               <Input
                 id="minRevenue"
                 type="number"
                 placeholder="0"
-                {...form.register("minRevenue", { valueAsNumber: true })}
+                value={filterForm.minRevenue}
+                onChange={(e) => setFilterForm({ ...filterForm, minRevenue: e.target.valueAsNumber })}
               />
             </div>
             <div className="space-y-2">
@@ -235,19 +239,21 @@ function MoreFiltersModal({ open, onOpenChange, onApply ,form}: { open: boolean;
                 id="maxRevenue"
                 type="number"
                 placeholder="∞"
-                {...form.register("maxRevenue", { valueAsNumber: true })}
+                value={filterForm.maxRevenue}
+                onChange={(e) => setFilterForm({ ...filterForm, maxRevenue: e.target.valueAsNumber })}
               />
             </div>
-          </div> */}
+          </div>
 
           {/* Validity Date Range */}
-          {/* <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <div className="space-y-2">
               <Label htmlFor="validityFrom">Validity From</Label>
               <Input
                 id="validityFrom"
                 type="date"
-                {...form.register("validity.from", { valueAsDate: true })}
+                value={filterForm.dateFrom}
+                onChange={(e) => setFilterForm({ ...filterForm, dateFrom: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -255,17 +261,18 @@ function MoreFiltersModal({ open, onOpenChange, onApply ,form}: { open: boolean;
               <Input
                 id="validityTo"
                 type="date"
-                {...form.register("validity.to", { valueAsDate: true })}
+                value={filterForm.dateTo}
+                onChange={(e) => setFilterForm({ ...filterForm, dateTo: e.target.value })}
               />
             </div>
-          </div> */}
+          </div>
 
         </form>
         <DialogFooter className="space-x-2 px-4 pb-2">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="submit" onClick={form.handleSubmit(handleSubmit)}>Apply Filters</Button>
+          <Button type="submit" onClick={handleSubmit}>Apply Filters</Button>
         </DialogFooter>
       </SheetContent>
     </Sheet>
@@ -279,11 +286,18 @@ export function UsersDashboard() {
   const [search , setSearch ] = useState('')
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const { customers, fetchCustomers, pagination, loading, error } = useCustomers()
-
-  const filterForm = useForm<FilterForm>({
-    resolver: zodResolver(filterSchema),
-    defaultValues: {},
-  });
+  const [filterForm , setFilterForm ] = useState<FilterForm>({
+    fullname: '',
+    phone: '',
+    email: '',
+    minOrders: 0,
+    maxOrders: 0,
+    minRevenue: 0,
+    maxRevenue: 0,
+    dateFrom:'',
+    dateTo:''
+  })
+ 
 
   const handleApplyFilters = (filters: FilterForm) => {
     const payload :any= {};
@@ -296,6 +310,24 @@ export function UsersDashboard() {
     if (filters.email) {
       payload.email = filters.email;
     }
+       if (filters.minOrders) {
+      payload.min_orders = filters.minOrders;
+    }
+    if (filters.maxOrders) {
+      payload.max_orders = filters.maxOrders;
+    }
+    if (filters.minRevenue) {
+      payload.min_revenue = filters.minRevenue;
+    }
+    if (filters.maxRevenue) {
+      payload.max_revenue = filters.maxRevenue;
+    }
+    if (filters.dateFrom) {
+      payload.date_from = filters.dateFrom;
+    }
+    if (filters.dateTo) {
+      payload.date_to = filters.dateTo;
+    }
     if (search) {
       payload.search = search;
     }
@@ -304,7 +336,7 @@ export function UsersDashboard() {
 
   useEffect(() => {
     const filter : any = {};
-    const values = filterForm.getValues()
+    const values = filterForm;
     if (values.fullname) {
       filter.fullname = values.fullname;
     }
@@ -314,6 +346,24 @@ export function UsersDashboard() {
     if (values.email) {
       filter.email = values.email;
     }
+    if (values.minOrders) {
+      filter.min_orders = values.minOrders;
+    }
+    if (values.maxOrders) {
+      filter.max_orders = values.maxOrders;
+    }
+    if (values.minRevenue) {
+      filter.min_revenue = values.minRevenue;
+    }
+    if (values.maxRevenue) {
+      filter.max_revenue = values.maxRevenue;
+    }
+    if (values.dateFrom) {
+      filter.date_from = values.dateFrom;
+    }
+    if (values.dateTo) {
+      filter.date_to = values.dateTo;
+    }
     if (search) {
       filter.search = search;
     }
@@ -322,7 +372,7 @@ export function UsersDashboard() {
 
   return (
     <div className="  space-y-6 bg-purple-50 min-h-screen">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
+      {/* <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
         <div>
           <div className="text-xs text-gray-500 mb-1">UTC+05:00 Asia/Karachi</div>
           <h1 className="text-xl font-bold">Registered Users</h1>
@@ -336,7 +386,7 @@ export function UsersDashboard() {
           </div>
           <Button className="bg-green-500 hover:bg-green-600">Export to Excel</Button>
         </div>
-      </div>
+      </div> */}
 
       <div className="bg-white p-4 rounded-lg shadow">
 
@@ -370,7 +420,7 @@ export function UsersDashboard() {
         </TableContainerCard>
       </div>
 
-      <MoreFiltersModal open={showMoreFilters} onOpenChange={setShowMoreFilters} onApply={handleApplyFilters} form={filterForm} />
+      <MoreFiltersModal open={showMoreFilters} onOpenChange={setShowMoreFilters} onApply={handleApplyFilters} filterForm={filterForm} setFilterForm={setFilterForm} />
     </div>
   );
 }

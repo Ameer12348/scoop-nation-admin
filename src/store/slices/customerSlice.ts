@@ -19,7 +19,47 @@ export interface Customer {
   last_ordered_at: string | null;
   customer_type: string;
 }
+export interface Product {
+  id: string;
+  slug: string;
+  title: string;
+  mainImage: string;
+  price: string;
+  discountType: string | null;
+  discountValue: string | null;
+  originalPrice: string | null;
+  discountStartDate: string | null;
+  discountEndDate: string | null;
+  rating: string;
+  description: string;
+  manufacturer: string;
+  inStock: string;
+  categoryId: string;
+}
 
+export interface Variant {
+  id: string;
+  productId: string;
+  name: string;
+  value: string;
+  price: string;
+  discountType: string | null;
+  discountValue: string | null;
+  originalPrice: string | null;
+  discountStartDate: string | null;
+  discountEndDate: string | null;
+  inStock: string;
+}
+
+export interface OrderItems {
+  id: string;
+  customerOrderId:string| number;
+  productId: string;
+  variantId: string;
+  quantity: string;
+  product: Product;
+  variant: Variant;
+}
 // Define CustomerDetails type based on API response
 export interface RecentOrder {
   id: string;
@@ -28,7 +68,10 @@ export interface RecentOrder {
   status: string;
   total: string;
   branch_name: string;
+  items: OrderItems[];
 }
+
+
 
 export interface CustomerDetails {
   id: string;
@@ -40,6 +83,7 @@ export interface CustomerDetails {
   date_of_birth: string | null;
   user_email: string;
   user_role: string;
+  phone: string | null;
   phone_verified: string;
   email_verified: string;
   user_created_at: string;

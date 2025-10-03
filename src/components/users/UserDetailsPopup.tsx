@@ -6,13 +6,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Customer } from "@/store/slices/customerSlice";
+import { Customer, RecentOrder } from "@/store/slices/customerSlice";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
 import { useCustomers } from "@/store/hooks";
+import Image from "next/image";
+import { BASE_URL } from "@/consts";
 
 interface UserDetailsPopupProps {
-    userId:number|string;
+    userId: number | string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     loading?: boolean;
@@ -117,19 +119,84 @@ const UserDetailsSkeleton = () => {
     );
 };
 
+
+const OrderDetailCard = ({order}:{order:RecentOrder})=>{
+    const [showOrderItems , setShowOrderItems ] = useState(false)
+
+    return ( <>
+                                                    <tr  className="hover:bg-gray-50">
+                                                        <td className="px-4 py-2 border">{order.id}</td>
+                                                        <td className="px-4 py-2 border">{format(new Date(order.dateTime), "dd MMM yyyy HH:mm")}</td>
+                                                        <td className="px-4 py-2 border">PKR {parseFloat(order.total).toFixed(2)}</td>
+                                                        <td className="px-4 py-2 border">
+                                                            <Badge
+
+                                                            >
+                                                                {order.status}
+                                                            </Badge>
+                                                            <button onClick={()=>setShowOrderItems(!showOrderItems)} className="ml-2 text-blue-500 hover:underline">
+                                                                {showOrderItems ? "Hide" : "Show"} Details
+                                                            </button>
+                                                        </td>
+                                                        {/* <td className="px-4 py-2 border">{order.items_count}</td>
+                          <td className="px-4 py-2 border">{order.branch}</td> */}
+                                                    </tr>
+                                                    {
+                                                        order.items?.map(item => (
+                                                            <tr key={item.id}>
+                                                                <td colSpan={4} >
+                                                                    <li key={item.product.id}  className={`overflow-hidden transition duration-300 ${showOrderItems ? 'h-auto flex py-6 px-2':'h-0'}`}>
+                                                                        <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                                                                            <Image
+                                                                                src={`${BASE_URL}/` + item.product.mainImage}
+                                                                                alt={item.product.title}
+                                                                                className="h-full w-full object-cover object-center"
+                                                                                width={100}
+                                                                                height={100}
+                                                                            />
+                                                                        </div>
+
+                                                                        <div className="ml-4 flex flex-1 flex-col">
+                                                                            <div>
+                                                                                <div className="flex justify-between text-base font-medium text-gray-900">
+                                                                                    <h3>
+                                                                                        <div>{item.product.title}</div>
+                                                                                        <div className="text-sm">
+                                                                                            {item.variant.name} : {item.variant.value}
+                                                                                        </div>
+                                                                                    </h3>
+                                                                                    <p className="ml-4">
+                                                                                      {'('} {item.quantity} {'x'} {+item.variant.price} =  Rs.{+item.quantity * +item.variant.price} {')'}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex flex-1 items-end justify-between text-sm">
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </li>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    }
+                                                </>)
+}
+
+
+
 const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPopupProps) => {
-    const {fetchCustomerDetails,customerDetails,detailsLoading,detailsError} = useCustomers()
-    useEffect(()=>{
+    const { fetchCustomerDetails, customerDetails, detailsLoading, detailsError } = useCustomers()
+    useEffect(() => {
         if (open) {
-        fetchCustomerDetails(userId)
+            fetchCustomerDetails(userId)
         }
-    },[open])
+    }, [open])
 
     const [activeTab, setActiveTab] = useState("details");
-  
 
 
-    
+
+
 
     if (detailsLoading) return <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[98vw] min-w-[98vw] md:min-w-[90vw] md:w-[90vw] xl:min-w-[1100px] xl:w-[1100px]  max-h-[90vh] overflow-y-auto">
@@ -185,7 +252,7 @@ const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPo
                                         <span className="font-medium">Phone:</span>
                                         <div className="flex items-center gap-1">
                                             <FaWhatsapp className="text-green-500" />
-                                            {/* <span>{customerDetails?.phone   || 'N/A'}</span> */}
+                                            <span>{customerDetails?.phone || 'N/A'}</span>
                                         </div>
                                     </div>
 
@@ -277,43 +344,30 @@ const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPo
                             <h3 className="text-lg font-semibold mb-4 border-b pb-2">Order History</h3>
 
                             {customerDetails?.recent_orders && customerDetails?.recent_orders.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full border text-sm">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="px-4 py-2 border">Order ID</th>
-                        <th className="px-4 py-2 border">Date</th>
-                        <th className="px-4 py-2 border">Amount</th>
-                        <th className="px-4 py-2 border">Status</th>
-                        {/* <th className="px-4 py-2 border">Items</th>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full border text-sm">
+                                        <thead className="bg-gray-100">
+                                            <tr>
+                                                <th className="px-4 py-2 border">Order ID</th>
+                                                <th className="px-4 py-2 border">Date</th>
+                                                <th className="px-4 py-2 border">Amount</th>
+                                                <th className="px-4 py-2 border">Status</th>
+                                                {/* <th className="px-4 py-2 border">Items</th>
                         <th className="px-4 py-2 border">Branch</th> */}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {customerDetails?.recent_orders.map((order) => (
-                        <tr key={order.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 border">{order.id}</td>
-                          <td className="px-4 py-2 border">{format(new Date(order.dateTime), "dd MMM yyyy HH:mm")}</td>
-                          <td className="px-4 py-2 border">PKR {parseFloat(order.total).toFixed(2)}</td>
-                          <td className="px-4 py-2 border">
-                            <Badge 
-                              
-                            >
-                              {order.status}
-                            </Badge>
-                          </td>
-                          {/* <td className="px-4 py-2 border">{order.items_count}</td>
-                          <td className="px-4 py-2 border">{order.branch}</td> */}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No order history available</p>
-                </div>
-              )}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {customerDetails?.recent_orders.map((order) => (
+                                               <OrderDetailCard order={order} key={order.id} />
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                    <p>No order history available</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Order Statistics */}
@@ -332,9 +386,9 @@ const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPo
                                 <h4 className="text-sm font-medium text-indigo-700">Average Order Value</h4>
                                 <p className="text-lg font-bold">
                                     PKR {' '}
-                                    {customerDetails?.total_orders && parseFloat(customerDetails?.total_spent) 
-                    ? (parseFloat(customerDetails?.total_spent) / parseInt( customerDetails?.total_orders)).toFixed(2) 
-                    : '0.00'}
+                                    {customerDetails?.total_orders && parseFloat(customerDetails?.total_spent)
+                                        ? (parseFloat(customerDetails?.total_spent) / parseInt(customerDetails?.total_orders)).toFixed(2)
+                                        : '0.00'}
                                 </p>
                             </div>
                         </div>
