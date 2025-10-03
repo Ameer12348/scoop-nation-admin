@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -44,6 +44,11 @@ export default function SearchAndPaginationWrapper({
   const startItem = (currentPage - 1) * itemsPerPage + 1
   const endItem = Math.min(currentPage * itemsPerPage, totalItems)
   const rangeText = `${startItem}-${endItem} of ${totalItems}`
+  const [search, setSearch] = useState(searchValue)
+
+  useEffect(()=>{
+    setSearch(searchValue)
+  },[searchValue])
 
   return (
     <div className="flex flex-col space-y-6">
@@ -51,8 +56,11 @@ export default function SearchAndPaginationWrapper({
       <div className="p-4 flex justify-center md:justify-end">
         <Input
           placeholder="Search..."
-          value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e)=>{
+            e.key === 'Enter' && onSearchChange(search)
+          }}
           className="w-full max-w-md dark:text-white"
         />
       </div>
