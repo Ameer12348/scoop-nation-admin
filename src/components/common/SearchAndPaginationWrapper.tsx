@@ -74,6 +74,7 @@ export default function SearchAndPaginationWrapper({
                 <SelectValue placeholder="Items per page" />
               </SelectTrigger>
               <SelectContent className='bg-white dark:bg-[#101828] dark:text-white'>
+                <SelectItem className='cursor-pointer' value="5">5 per page</SelectItem>
                 <SelectItem className='cursor-pointer' value="10">10 per page</SelectItem>
                 <SelectItem className='cursor-pointer' value="20">20 per page</SelectItem>
                 <SelectItem className='cursor-pointer' value="50">50 per page</SelectItem>

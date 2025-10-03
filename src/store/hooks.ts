@@ -4,6 +4,7 @@ import type { TypedUseSelectorHook } from 'react-redux'
 import type { RootState, AppDispatch } from './index'
 import { setShowAuthDialog, setAuthTab, setIsLoggedIn, logout, clearError, loginAdmin, registerUser, setAuthFromStorage } from './slices/authSlice'
 import { fetchBanners, fetchBannerById, updateBanner, createBanner, clearBannerError, selectBanners, selectCurrentBanner, selectBannersLoading, selectBannersError, selectCreateBanner } from './slices/bannerSlice'
+import { fetchCustomers, clearCustomerError, selectCustomers, selectCustomersPagination, selectCustomersLoading, selectCustomersError, selectCustomersFilters, CustomerQueryParams } from './slices/customerSlice'
 
 export const useAppDispatch: () => AppDispatch = useDispatch
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
@@ -32,6 +33,28 @@ export const useBanners = () => {
     createBannerAction: (bannerData: { name: string, description: string, start_date: string, end_date: string, is_active: boolean }) => 
       dispatch(createBanner(bannerData)),
     clearError: () => dispatch(clearBannerError()),
+  };
+}
+
+export const useCustomers = () => {
+  const customers = useAppSelector(selectCustomers);
+  const pagination = useAppSelector(selectCustomersPagination);
+  const loading = useAppSelector(selectCustomersLoading);
+  const error = useAppSelector(selectCustomersError);
+  const filters = useAppSelector(selectCustomersFilters);
+  const dispatch = useAppDispatch();
+  
+  return {
+    // State
+    customers,
+    pagination,
+    loading,
+    error,
+    filters,
+    
+    // Actions
+    fetchCustomers: (params: CustomerQueryParams = {}) => dispatch(fetchCustomers(params)),
+    clearError: () => dispatch(clearCustomerError()),
   };
 }
 

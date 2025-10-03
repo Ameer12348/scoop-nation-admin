@@ -4,7 +4,7 @@
 // This is the main dashboard component for managing registered users.
 // It includes a table of users, search/filter form, and more filters modal.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Search, Download, Filter, Eye } from "lucide-react";
 import { FaPhone, FaEnvelope, FaUser, FaMapMarkerAlt, FaTimes, FaCheck, FaPrint, FaEdit, FaWhatsapp } from "react-icons/fa";
@@ -21,6 +21,8 @@ import * as z from "zod";
 import type { User } from "@/types/UsersTypes";
 import TableContainerCard from "../common/TableContainerCard";
 import SearchAndPaginationWrapper from "../common/SearchAndPaginationWrapper";
+import { Customer } from "@/store/slices/customerSlice";
+import { useCustomers } from "@/store/hooks";
 
 interface UsersDashboardProps {
   initialUsers: User[];
@@ -42,7 +44,7 @@ const filterSchema = z.object({
 type FilterForm = z.infer<typeof filterSchema>;
 
 
-function UsersTable({ data }: { data: User[] }) {
+function UsersTable({ data }: { data: Customer[] }) {
   return (
     <div className="overflow-x-auto ">
       <table className="min-w-full border text-sm">
@@ -66,8 +68,7 @@ function UsersTable({ data }: { data: User[] }) {
               {/* full name */}
               <td className="px-3 py-2 border text-center">
                 <div className="flex items-center space-x-2">
-                  <FaUser className="h-4 w-4 text-gray-400" />
-                  <span>{row.fullName ?? 'N/A'}</span>
+                  <span>{row.fullname ?? 'N/A'}</span>
                 </div>
               </td>
               {/* phone no */}
@@ -81,35 +82,36 @@ function UsersTable({ data }: { data: User[] }) {
               <td className="px-3 py-2 border text-center">
                 <div className="flex items-center space-x-1">
                   <FaEnvelope className="h-3 w-3 text-gray-400" />
-                  <span className="truncate max-w-xs">{row.email ?? 'N/A'}</span>
+                  <a href={`mailto:${row.email}`}  className="truncate max-w-xs">{row.email ?? 'N/A'}</a >
                 </div>
               </td>
               {/* total orders */}
               <td className="px-3 py-2 border text-center">
-                <span>{row.totalOrders ?? 0}</span>
+                <span>{row.total_orders ?? 0}</span>
               </td>
               {/* total revenue */}
               <td className="px-3 py-2 border text-center">
-                <span>PKR {(row.totalRevenue ?? 0).toFixed(2)}</span>
+                <span>PKR {(  parseFloat(row.total_revenue) ?? 0).toFixed(2)}</span>
               </td>
               {/* first ordered at  */}
               <td className="px-3 py-2 border text-center">
-                {row.firstOrderedAt ? format(row.firstOrderedAt, "dd MMM yyyy") : 'N/A'}
+                {row.first_ordered_at ? format(row.first_ordered_at, "dd MMM yyyy") : 'N/A'}
               </td>
               {/* last ordered at */}
               <td className="px-3 py-2 border text-center">
-                {row.lastOrderedAt ? format(row.lastOrderedAt, "dd MMM yyyy") : 'N/A'}
+                {row.last_ordered_at ? format(row.last_ordered_at, "dd MMM yyyy") : 'N/A'}
               </td>
               {/* social platform */}
               <td className="px-3 py-2 border text-center">
-                <Badge variant="secondary">{row.socialPlatform ?? 'Local Signup'}</Badge>               </td>
+                {/* <Badge variant="secondary">{row.socialPlatform ?? 'Local Signup'}</Badge>                */}
+              </td>
               {/* blacklist action */}
               <td className="px-3 py-2 border text-center">
                 <div className="flex space-x-1">
                   <Button variant="outline" size="sm" className="p-1 h-6">
                     <FaTimes className="h-3 w-3 text-red-500" />
                   </Button>
-                  <Badge variant={row.blacklist ? "destructive" : "default"} className="text-xs">No</Badge>
+                  {/* <Badge variant={row.blacklist ? "destructive" : "default"} className="text-xs">No</Badge> */}
                 </div>
               </td>
               {/* actions */}
@@ -267,94 +269,22 @@ function MoreFiltersModal({ open, onOpenChange, onApply }: { open: boolean; onOp
   );
 }
 
-export function UsersDashboard({ initialUsers }: UsersDashboardProps) {
-  const [usersData, setUsersData] = useState(initialUsers);
-  const [showMoreFilters, setShowMoreFilters] = useState(false);
+export function UsersDashboard()  {
 
+  const [currentPage , setCurrentPage ] = useState(1)
+  const [perPage , setPerPage ] = useState(10)
+
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const {customers,fetchCustomers,pagination}  = useCustomers()
   const handleApplyFilters = (filters: FilterForm) => {
     // Mock filter logic
     console.log("Applied filters:", filters);
     // In real app, filter usersData based on filters
   };
 
-  const columns = [
-    {
-      accessorKey: "fullName",
-      header: "FULL NAME",
-      cell: ({ row }: { row: User }) => (
-        <div className="flex items-center space-x-2">
-          <FaUser className="h-4 w-4 text-gray-400" />
-          <span>{row.fullName ?? 'N/A'}</span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "phone",
-      header: "PHONE NO",
-      cell: ({ row }: { row: User }) => (
-        <div className="flex items-center space-x-1">
-          <FaWhatsapp className="h-3 w-3 text-green-500" />
-          <span>{row.phone ?? 'N/A'}</span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "email",
-      header: "EMAIL ADDRESS",
-      cell: ({ row }: { row: User }) => (
-        <div className="flex items-center space-x-1">
-          <FaEnvelope className="h-3 w-3 text-gray-400" />
-          <span className="truncate max-w-xs">{row.email ?? 'N/A'}</span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "totalOrders",
-      header: "TOTAL ORDERS",
-      cell: ({ row }: { row: User }) => <span>{row.totalOrders ?? 0}</span>,
-    },
-    {
-      accessorKey: "totalRevenue",
-      header: "TOTAL REVENUE",
-      cell: ({ row }: { row: User }) => <span>PKR {(row.totalRevenue ?? 0).toFixed(2)}</span>,
-    },
-    {
-      accessorKey: "firstOrderedAt",
-      header: "FIRST ORDERED AT",
-      cell: ({ row }: { row: User }) => row.firstOrderedAt ? format(row.firstOrderedAt, "dd MMM yyyy") : 'N/A',
-    },
-    {
-      accessorKey: "lastOrderedAt",
-      header: "LAST ORDERED AT",
-      cell: ({ row }: { row: User }) => row.lastOrderedAt ? format(row.lastOrderedAt, "dd MMM yyyy") : 'N/A',
-    },
-    {
-      accessorKey: "socialPlatform",
-      header: "SOCIAL PLATFORM",
-      cell: ({ row }: { row: User }) => <Badge variant="secondary">{row.socialPlatform ?? 'Local Signup'}</Badge>,
-    },
-    {
-      id: "blacklistAction",
-      header: "BLACKLIST ACTION",
-      cell: ({ row }: { row: User }) => (
-        <div className="flex space-x-1">
-          <Button variant="outline" size="sm" className="p-1 h-6">
-            <FaTimes className="h-3 w-3 text-red-500" />
-          </Button>
-          <Badge variant={row.blacklist ? "destructive" : "default"} className="text-xs">No</Badge>
-        </div>
-      ),
-    },
-    {
-      id: "action",
-      header: "ACTION",
-      cell: ({ row }: { row: User }) => (
-        <Button variant="ghost" size="sm" className="p-1">
-          <Eye className="h-4 w-4" />
-        </Button>
-      ),
-    },
-  ];
+useEffect(() => {
+  fetchCustomers({ page: currentPage, per_page: perPage });
+}, [currentPage, perPage])
 
   return (
     <div className="  space-y-6 bg-purple-50 min-h-screen">
@@ -385,13 +315,13 @@ export function UsersDashboard({ initialUsers }: UsersDashboardProps) {
           <SearchAndPaginationWrapper
             searchValue={''}
             onSearchChange={() => { }}
-            currentPage={1}
-            totalItems={10}
-            itemsPerPage={10}
-            onPageChange={() => { }}
-            onItemsPerPageChange={() => { }}
+            currentPage={currentPage}
+            totalItems={parseInt(pagination?.total || '0') || 0}
+            itemsPerPage={perPage}
+            onPageChange={(page) => {setCurrentPage(page) }}
+            onItemsPerPageChange={(data) => {setPerPage(data) }}
           >
-            <UsersTable data={usersData} />
+            <UsersTable data={customers} />
           </SearchAndPaginationWrapper>
         </TableContainerCard>
       </div>
