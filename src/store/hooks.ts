@@ -4,7 +4,7 @@ import type { TypedUseSelectorHook } from 'react-redux'
 import type { RootState, AppDispatch } from './index'
 import { setShowAuthDialog, setAuthTab, setIsLoggedIn, logout, clearError, loginAdmin, registerUser, setAuthFromStorage } from './slices/authSlice'
 import { fetchBanners, fetchBannerById, updateBanner, createBanner, clearBannerError, selectBanners, selectCurrentBanner, selectBannersLoading, selectBannersError, selectCreateBanner } from './slices/bannerSlice'
-import { fetchCustomers, clearCustomerError, selectCustomers, selectCustomersPagination, selectCustomersLoading, selectCustomersError, selectCustomersFilters, CustomerQueryParams } from './slices/customerSlice'
+import { fetchCustomers, clearCustomerError, selectCustomers, selectCustomersPagination, selectCustomersLoading, selectCustomersError, selectCustomersFilters, CustomerQueryParams, fetchCustomerDetails, selectCustomerDetails, selectCustomerDetailsLoading, selectCustomerDetailsError } from './slices/customerSlice'
 
 export const useAppDispatch: () => AppDispatch = useDispatch
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
@@ -43,6 +43,9 @@ export const useCustomers = () => {
   const error = useAppSelector(selectCustomersError);
   const filters = useAppSelector(selectCustomersFilters);
   const dispatch = useAppDispatch();
+  const customerDetails = useAppSelector(selectCustomerDetails);
+  const detailsLoading = useAppSelector(selectCustomerDetailsLoading);
+  const detailsError = useAppSelector(selectCustomerDetailsError)
   
   return {
     // State
@@ -51,9 +54,13 @@ export const useCustomers = () => {
     loading,
     error,
     filters,
+    customerDetails,
+    detailsLoading,
+    detailsError,
     
     // Actions
     fetchCustomers: (params: CustomerQueryParams = {}) => dispatch(fetchCustomers(params)),
+    fetchCustomerDetails: (id: string | number) => dispatch(fetchCustomerDetails(id)),
     clearError: () => dispatch(clearCustomerError()),
   };
 }

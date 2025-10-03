@@ -23,6 +23,7 @@ import TableContainerCard from "../common/TableContainerCard";
 import SearchAndPaginationWrapper from "../common/SearchAndPaginationWrapper";
 import { Customer } from "@/store/slices/customerSlice";
 import { useCustomers } from "@/store/hooks";
+import UserDetailsPopup from "./UserDetailsPopup";
 
 interface UsersDashboardProps {
   initialUsers: User[];
@@ -45,21 +46,29 @@ type FilterForm = z.infer<typeof filterSchema>;
 
 
 function UsersTable({ data }: { data: Customer[] }) {
+  const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
+  const [showUserDetails, setShowUserDetails] = useState(false);
+
+  const handleViewUser = (user: Customer) => {
+    setSelectedUser(user);
+    setShowUserDetails(true);
+  };
+
   return (
     <div className="overflow-x-auto ">
       <table className="min-w-full border text-sm">
         <thead className="bg-gray-100 text-left text-xs md:text-sm">
           <tr>
-            <th className="px-3 py-2 border">FULL NAME	</th>
-            <th className="px-3 py-2 border">PHONE NO	</th>
-            <th className="px-3 py-2 border">EMAIL ADDRESS		</th>
-            <th className="px-3 py-2 border">TOTAL ORDERS	</th>
-            <th className="px-3 py-2 border">TOTAL REVENUE	</th>
-            <th className="px-3 py-2 border">FIRST ORDERED AT	</th>
-            <th className="px-3 py-2 border">LAST ORDERED AT	</th>
-            <th className="px-3 py-2 border">SOCIAL PLATFORM	</th>
-            <th className="px-3 py-2 border">BLACKLIST ACTION	</th>
-            <th className="px-3 py-2 border">ACTION</th>
+            <th className="px-3 py-2 border whitespace-nowrap">FULL NAME	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">PHONE NO	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">EMAIL ADDRESS		</th>
+            <th className="px-3 py-2 border whitespace-nowrap">TOTAL ORDERS	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">TOTAL REVENUE	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">FIRST ORDERED AT	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">LAST ORDERED AT	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">SOCIAL PLATFORM	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">BLACKLIST ACTION	</th>
+            <th className="px-3 py-2 border whitespace-nowrap">ACTION</th>
           </tr>
         </thead>
         <tbody>
@@ -116,14 +125,27 @@ function UsersTable({ data }: { data: Customer[] }) {
               </td>
               {/* actions */}
               <td className="px-3 py-2 border text-center">
-                <Button variant="ghost" size="sm" className="p-1">
-                  <Eye className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="p-1 hover:bg-blue-50"
+                  onClick={() => handleViewUser(row)}
+                >
+                  <Eye className="h-4 w-4 text-blue-600" />
                 </Button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* User Details Popup */}
+      <UserDetailsPopup 
+        userId={selectedUser?.id ?? 0} 
+        open={showUserDetails} 
+        onOpenChange={setShowUserDetails} 
+        loading={true}
+      />
     </div>
   );
 }
