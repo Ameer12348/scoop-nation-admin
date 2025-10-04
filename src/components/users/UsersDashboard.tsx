@@ -334,8 +334,10 @@ export function UsersDashboard() {
     fetchCustomers({ page: currentPage, per_page: perPage, ...payload });
   };
 
-  useEffect(() => {
-    const filter : any = {};
+
+
+  const fetchAllCustomers = ()=>{
+      const filter : any = {};
     const values = filterForm;
     if (values.fullname) {
       filter.fullname = values.fullname;
@@ -368,6 +370,9 @@ export function UsersDashboard() {
       filter.search = search;
     }
     fetchCustomers({ page: currentPage, per_page: perPage, ...filter });
+  }
+  useEffect(() => {
+    fetchAllCustomers()
   }, [currentPage, perPage, search])
 
   return (
@@ -395,6 +400,8 @@ export function UsersDashboard() {
           addButton
           addButtonText="More Filters"
           addButtonAction={() => { setShowMoreFilters(true) }}
+          hasRefreshButton={true}
+          refreshButtonAction={() => { fetchAllCustomers() }}
         >
           <SearchAndPaginationWrapper
             searchValue={search}
@@ -404,6 +411,7 @@ export function UsersDashboard() {
             itemsPerPage={perPage}
             onPageChange={(page) => { setCurrentPage(page) }}
             onItemsPerPageChange={(data) => { setPerPage(data) }}
+
           >
             {
               loading ? <div className="text-center text-gray-500 py-7 flex justify-center items-center">

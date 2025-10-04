@@ -23,9 +23,10 @@ import * as z from "zod"; // For defining form validation rules
 import type { OrderItem } from "@/types/OrderTypes"; // Import our order types
 import TableContainerCard from "../common/TableContainerCard";
 import SearchAndPaginationWrapper from "../common/SearchAndPaginationWrapper";
-import { fetchOrders, Order } from "@/store/slices/orderSlice";
+import { fetchOrders, Order, updateOrder } from "@/store/slices/orderSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import OrderDetailsModal from "./OrderDetailsModal";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 // Props for the main component: receives initial list of orders from parent
 interface OrdersDashboardProps {
@@ -65,6 +66,8 @@ type AddOrderForm = z.infer<typeof addOrderSchema>;
 
 
 function OrdersDataTable({ data, showOrderDetails }: { data: Order[], showOrderDetails: (order: Order) => void }) {
+  const dispatch = useAppDispatch()
+  const { loading: updateOrderLoading } = useAppSelector(x => x.orders.updateOrder)
   const statusMap: Record<string, string> = {
     pending: "Pending",
     rejected: "Rejected",
@@ -84,14 +87,27 @@ function OrdersDataTable({ data, showOrderDetails }: { data: Order[], showOrderD
     }
   };
 
+  const handleUpdateOrder = (orderId: string | number, status: string) => {
+    dispatch(updateOrder({ orderId, status }));
+  };
+
   // Mobile card view for small screens
   const renderMobileCard = (row: Order) => (
     <div key={row.id} className="border rounded-lg p-3 mb-3 bg-white shadow-sm">
       <div className="flex justify-between items-start mb-2">
         <Badge variant="secondary" className="text-xs">Order #{row.id ?? 'N/A'}</Badge>
-        <Badge variant={getStatusVariant(row.status)} className="text-xs">
-          {statusMap[row.status] ?? 'Unknown'}
-        </Badge>
+        <DropdownMenu>
+          <DropdownMenuTrigger>  <Badge variant={getStatusVariant(row.status)} className="text-xs"> {/* Custom variant */}
+            {
+              updateOrderLoading ? <Loader className="h-3 w-3  animate-spin" /> : <>{statusMap[row.status] ?? 'Unknown'}</>
+            }
+          </Badge></DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'pending') }}>pending</DropdownMenuLabel>
+            <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'rejected') }}>rejected</DropdownMenuLabel>
+            <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'accepted') }}>accepted</DropdownMenuLabel>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="text-xs font-mono mb-2">{row.order_number ?? 'N/A'}</div>
@@ -190,11 +206,22 @@ function OrdersDataTable({ data, showOrderDetails }: { data: Order[], showOrderD
                 </td>
                 {/* status */}
                 <td className="px-3 py-2 border text-center">
-                  <Badge variant={getStatusVariant(row.status)} className="text-xs"> {/* Custom variant */}
-                    {statusMap[row.status] ?? 'Unknown'}
-                  </Badge>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>  <Badge variant={getStatusVariant(row.status)} className="text-xs"> {/* Custom variant */}
+                      {
+                        updateOrderLoading ? <Loader className="h-3 w-3  animate-spin" /> : <>{statusMap[row.status] ?? 'Unknown'}</>
+                      }
+
+                    </Badge></DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'pending') }}>pending</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'rejected') }}>rejected</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'accepted') }}>accepted</DropdownMenuLabel>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
-                
+
                 {/* total */}
                 <td className="px-3 py-2 border text-center">
                   <span className="text-sm">PKR {(parseFloat(row?.total) ?? 0).toFixed(2)}</span>
@@ -470,7 +497,7 @@ export function OrdersDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10)
 
-  const {orders,loading:ordersLoading,pagination,error} = useAppSelector(x=>x.orders)
+  const { orders, loading: ordersLoading, pagination, error } = useAppSelector(x => x.orders)
   const dispatch = useAppDispatch()
   // Open details modal for a specific order
   const handleViewDetails = (order: Order) => {
@@ -487,13 +514,17 @@ export function OrdersDashboard() {
   const handleStatusFilterChange = (value: string | null) => {
   };
 
-  useEffect(()=>{
-    const payload :{page:number,per_page:number,search?:string} = {page:currentPage,per_page:itemsPerPage};
+
+const  fetchAllOrder = ()=>{
+    const payload: { page: number, per_page: number, search?: string } = { page: currentPage, per_page: itemsPerPage };
     if (searchTerm) {
       payload.search = searchTerm;
     }
     dispatch(fetchOrders(payload));
-  },[currentPage,itemsPerPage,searchTerm])
+  }
+  useEffect(() => {
+    fetchAllOrder()
+  }, [currentPage, itemsPerPage, searchTerm])
 
 
   return (
@@ -503,6 +534,8 @@ export function OrdersDashboard() {
         addButton
         addButtonText="Add New Order"
         addButtonAction={() => { setShowAddOrder(true) }}
+        hasRefreshButton={true}
+        refreshButtonAction={() => {  fetchAllOrder()}}
       >
         <SearchAndPaginationWrapper
           searchValue={searchTerm}
@@ -521,26 +554,26 @@ export function OrdersDashboard() {
             setCurrentPage(1);
           }}
         >
-           {
-              ordersLoading ? <div className="text-center text-gray-500 py-7 flex justify-center items-center">
-                <Loader className="h-8 w-8 animate-spin" />
-              </div> : error ? <div className="text-center text-red-500">
-                {error}
-              </div> :
-                orders.length> 0 ? <OrdersDataTable data={orders} showOrderDetails={handleViewDetails} />: 
+          {
+            ordersLoading ? <div className="text-center text-gray-500 py-7 flex justify-center items-center">
+              <Loader className="h-8 w-8 animate-spin" />
+            </div> : error ? <div className="text-center text-red-500">
+              {error}
+            </div> :
+              orders.length > 0 ? <OrdersDataTable data={orders} showOrderDetails={handleViewDetails} /> :
                 <div className="text-center text-gray-500 py-7 flex justify-center items-center">
                   No Orders found
                 </div>
-            }
+          }
         </SearchAndPaginationWrapper>
       </TableContainerCard>
 
       {/* Render details modal if open */}
       {showDetails && selectedOrder && (
         <OrderDetailsModal
-          order={selectedOrder} 
-          open={showDetails} 
-          onOpenChange={setShowDetails} 
+          order={selectedOrder}
+          open={showDetails}
+          onOpenChange={setShowDetails}
         />
       )}
 

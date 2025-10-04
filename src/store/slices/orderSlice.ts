@@ -82,6 +82,10 @@ interface OrdersState {
     data: Order | null;
     loading:boolean;
     error: null | string;
+  },
+  updateOrder: {
+    loading: boolean,
+    error: null | string,
   }
 };
 
@@ -92,6 +96,10 @@ const initialState: OrdersState = {
   error: null,
   orderDetails:{
     data: null,
+    loading: false,
+    error: null,
+  },
+  updateOrder: {
     loading: false,
     error: null,
   }
@@ -133,6 +141,22 @@ export const fetchOrderDetails = createAsyncThunk(
   }
 );
 
+export const updateOrder = createAsyncThunk(
+  'orders/updateOrder',
+  async (params:{orderId:string|number,status:string} , { rejectWithValue ,dispatch}) => {
+    try {
+      const { data } = await api.post<{ success:boolean, data:Order,error?:string}>(`/api/admin/update-order`,params);
+      if (!data.success) {
+          return rejectWithValue(data?.error || 'Failed to update order');
+      }
+      dispatch(fetchOrderDetails(params.orderId));
+      return data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update order');
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: 'orders',
   initialState,
@@ -143,6 +167,7 @@ const orderSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // -------------------------- fetch orders -----------------------------
     builder
       .addCase(fetchOrders.pending, (state) => {
         state.loading = true;
@@ -157,7 +182,7 @@ const orderSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       });
-
+      // -------------------------- fetch order details -----------------------------
     builder
       .addCase(fetchOrderDetails.pending, (state) => {
         state.orderDetails.loading = true;
@@ -167,10 +192,25 @@ const orderSlice = createSlice({
         state.orderDetails.loading = false;
         state.orderDetails.data = action.payload;
         state.orderDetails.error = null;
+        state.orders = state.orders.map(order => order.id === action.payload.id ? action.payload : order);
       })
       .addCase(fetchOrderDetails.rejected, (state, action) => {
         state.orderDetails.loading = false;
         state.orderDetails.error = action.payload as string;
+      });
+      // ----------------------------------------- update order -------------------------------
+      builder
+      .addCase(updateOrder.pending, (state) => {
+        state.updateOrder.loading = true;
+        state.updateOrder.error = null;
+      })
+      .addCase(updateOrder.fulfilled, (state, ) => {
+        state.updateOrder.loading = false;
+        state.updateOrder.error = null;
+      })
+      .addCase(updateOrder.rejected, (state, action) => {
+        state.updateOrder.loading = false;
+        state.updateOrder.error = action.payload as string;
       });
   },
 });

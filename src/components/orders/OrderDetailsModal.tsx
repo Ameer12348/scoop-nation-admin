@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchOrderDetails, Order } from "@/store/slices/orderSlice";
+import { fetchOrderDetails, Order, updateOrder } from "@/store/slices/orderSlice";
 import { useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -9,11 +9,22 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import { format } from "date-fns";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Skeleton } from "../ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Loader } from "lucide-react";
 
+
+ const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'pending': return 'outline' as const; // Orange-ish in shadcn
+      case 'rejected': return 'destructive' as const; // Red
+      case 'accepted': return 'default' as const; // Green-ish
+      default: return 'default' as const;
+    }
+  };
 export default function OrderDetailsModal({ order, open, onOpenChange}: { order: Order; open: boolean; onOpenChange: (open: boolean) => void; }) {
   const {orderDetails:{data:currentOrder,loading:orderDetailsLoading,error:orderDetailsError}} = useAppSelector(x=>x.orders)
-  const dispatch  = useAppDispatch()
-
+  const dispatch = useAppDispatch()
+  const { loading: updateOrderLoading } = useAppSelector(x => x.orders.updateOrder)
 
 
    useEffect(()=>{
@@ -22,11 +33,18 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
     }
   },[order,open])
 
+
+
+  const handleUpdateOrder = (orderId: string | number, status: string) => {
+    dispatch(updateOrder({ orderId, status }));
+  };
+
+
   if (orderDetailsLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-white p-4 md:p-6 rounded-lg min-w-[95vw] 2xl:min-w-[1300px] md:w-auto">
-          <div className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white  rounded-lg min-w-[95vw] 2xl:min-w-[1300px] md:w-auto">
+          <div className="max-h-[90vh] p-4 md:p-6 overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold">
                 <Skeleton className="h-6 w-48" />
@@ -125,8 +143,8 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
   if (orderDetailsError) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-white p-4 md:p-6 rounded-lg min-w-[95vw] 2xl:min-w-[1300px] md:w-auto">
-          <div className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white  rounded-lg min-w-[95vw] 2xl:min-w-[1300px] md:w-auto">
+          <div className="max-h-[90vh] p-4 md:p-6 overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold">Order Details</DialogTitle>
             </DialogHeader>
@@ -214,8 +232,8 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="  bg-white p-4 md:p-6 rounded-lg min-w-[95vw] 2xl:min-w-[1300px] md:w-auto">
-      <div className="max-h-[90vh] overflow-y-auto">
+      <DialogContent className="  bg-white  rounded-lg min-w-[95vw]  2xl:min-w-[1300px] md:w-auto">
+      <div className="max-h-[90vh] p-4 md:p-6 overflow-y-auto">
           <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Order Details (ASAP)</DialogTitle>
         </DialogHeader>
@@ -247,12 +265,19 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                 <p><strong>Time Status:</strong> {currentOrder?.dateTime ? format(currentOrder?.dateTime, "dd/MM/yyyy HH:mm:ss") : 'N/A'}</p>
                 <p>
                   <strong>Status:</strong> 
-                  <Badge 
-                    variant={currentOrder?.status === 'accepted' ? 'default' : currentOrder?.status === 'rejected' ? 'destructive' : 'outline'} 
-                    className="ml-1"
-                  >
-                    {currentOrder?.status === 'accepted' ? 'Accepted' : currentOrder?.status === 'rejected' ? 'Rejected' : 'Pending'}
-                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>  <Badge  variant={getStatusVariant(currentOrder?.status as string)} className="text-xs"> {/* Custom variant */}
+                      {
+                        updateOrderLoading ? <Loader className="h-3 w-3  animate-spin" /> :  <>{currentOrder?.status ?? 'Unknown'}</>
+                      }
+                     
+                    </Badge></DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'pending')}}>pending</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'rejected')}}>rejected</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'accepted')}}>accepted</DropdownMenuLabel>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </p>
                 <p><strong>Delivery Time:</strong> ASAP</p>
                 <p><strong>Payment Type:</strong> Cash on delivery</p>

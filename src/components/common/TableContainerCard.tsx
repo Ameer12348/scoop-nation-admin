@@ -1,3 +1,4 @@
+import { RefreshCw } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -11,6 +12,9 @@ interface TableContainerCardProps {
   addButtonAction?: () => void
   addButtonClassName?: string
   addButtonLink?:string
+  hasRefreshButton?: boolean;
+  refreshButtonClassName?: string;
+  refreshButtonAction?: () => void;
 }
 
 const TableContainerCard: React.FC<TableContainerCardProps> = ({
@@ -22,7 +26,10 @@ const TableContainerCard: React.FC<TableContainerCardProps> = ({
   addButtonText = 'Add',
   addButtonAction,
   addButtonClassName ='',
-  addButtonLink
+  addButtonLink,
+  hasRefreshButton = false,
+  refreshButtonClassName = '',
+  refreshButtonAction
 }) => {
   return (
     <div
@@ -41,10 +48,15 @@ const TableContainerCard: React.FC<TableContainerCardProps> = ({
           )}
         </div>
         {/* add button */}
-        {addButton && addButtonLink ?  (
+      <div className="flex items-center gap-2">
+          {addButton && addButtonLink ?  (
           <Link href={addButtonLink} className={`px-3 py-1 bg-brand-500 text-sm text-white rounded ${addButtonClassName}`} > {addButtonText}</Link>
         ) :           <button className={`px-3 py-1 bg-brand-500 text-sm text-white rounded ${addButtonClassName}`} onClick={addButtonAction} > {addButtonText}</button>
 }
+     
+{ hasRefreshButton &&          <button className={`p-1 rounded-full bg-gray-200 text-sm text-gray-950   ${refreshButtonClassName}`} onClick={refreshButtonAction} > <RefreshCw size={18} /></button>
+}        
+      </div>
       </div>
       
       {/* Card Body */}
