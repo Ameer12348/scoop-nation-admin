@@ -78,13 +78,23 @@ interface OrdersState {
   pagination: Pagination | null;
   loading: boolean;
   error: string | null;
-}
+  orderDetails: {
+    data: Order | null;
+    loading:boolean;
+    error: null | string;
+  }
+};
 
 const initialState: OrdersState = {
   orders: [],
   pagination: null,
   loading: false,
   error: null,
+  orderDetails:{
+    data: null,
+    loading: false,
+    error: null,
+  }
 };
 
 // Define the query parameters interface
@@ -105,6 +115,20 @@ export const fetchOrders = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch orders');
+    }
+  }
+);
+export const fetchOrderDetails = createAsyncThunk(
+  'orders/fetchOrderDetails',
+  async (id :string | number , { rejectWithValue }) => {
+    try {
+      const { data} = await api.get<{ success:boolean, data:Order,error?:string}>(`/api/admin/orders-details?id=${id}`);
+      if (!data.success) {
+          return rejectWithValue(data?.error || 'Failed to fetch order details');
+      }
+      return data.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch order details');
     }
   }
 );
@@ -132,6 +156,21 @@ const orderSlice = createSlice({
       .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      });
+
+    builder
+      .addCase(fetchOrderDetails.pending, (state) => {
+        state.orderDetails.loading = true;
+        state.orderDetails.error = null;
+      })
+      .addCase(fetchOrderDetails.fulfilled, (state, action: PayloadAction<Order>) => {
+        state.orderDetails.loading = false;
+        state.orderDetails.data = action.payload;
+        state.orderDetails.error = null;
+      })
+      .addCase(fetchOrderDetails.rejected, (state, action) => {
+        state.orderDetails.loading = false;
+        state.orderDetails.error = action.payload as string;
       });
   },
 });
