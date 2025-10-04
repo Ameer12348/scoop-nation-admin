@@ -120,66 +120,66 @@ const UserDetailsSkeleton = () => {
 };
 
 
-const OrderDetailCard = ({order}:{order:RecentOrder})=>{
-    const [showOrderItems , setShowOrderItems ] = useState(false)
+const OrderDetailCard = ({ order }: { order: RecentOrder }) => {
+    const [showOrderItems, setShowOrderItems] = useState(false)
 
-    return ( <>
-                                                    <tr  className="hover:bg-gray-50">
-                                                        <td className="px-4 py-2 border">{order.id}</td>
-                                                        <td className="px-4 py-2 border">{format(new Date(order.dateTime), "dd MMM yyyy HH:mm")}</td>
-                                                        <td className="px-4 py-2 border">PKR {parseFloat(order.total).toFixed(2)}</td>
-                                                        <td className="px-4 py-2 border">
-                                                            <Badge
+    return (<>
+        <tr className="hover:bg-gray-50">
+            <td className="px-4 py-2 border">{order.id}</td>
+            <td className="px-4 py-2 border">{format(new Date(order.dateTime), "dd MMM yyyy HH:mm")}</td>
+            <td className="px-4 py-2 border">PKR {parseFloat(order.total).toFixed(2)}</td>
+            <td className="px-4 py-2 border">
+                <Badge
 
-                                                            >
-                                                                {order.status}
-                                                            </Badge>
-                                                            <button onClick={()=>setShowOrderItems(!showOrderItems)} className="ml-2 text-blue-500 hover:underline">
-                                                                {showOrderItems ? "Hide" : "Show"} Details
-                                                            </button>
-                                                        </td>
-                                                        {/* <td className="px-4 py-2 border">{order.items_count}</td>
+                >
+                    {order.status}
+                </Badge>
+                <button onClick={() => setShowOrderItems(!showOrderItems)} className="ml-2 text-blue-500 hover:underline">
+                    {showOrderItems ? "Hide" : "Show"} Details
+                </button>
+            </td>
+            {/* <td className="px-4 py-2 border">{order.items_count}</td>
                           <td className="px-4 py-2 border">{order.branch}</td> */}
-                                                    </tr>
-                                                    {
-                                                        order.items?.map(item => (
-                                                            <tr key={item.id}>
-                                                                <td colSpan={4} >
-                                                                    <li key={item.product.id}  className={`overflow-hidden transition duration-300 ${showOrderItems ? 'h-auto flex py-6 px-2':'h-0'}`}>
-                                                                        <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                                                                            <Image
-                                                                                src={`${BASE_URL}/` + item.product.mainImage}
-                                                                                alt={item.product.title}
-                                                                                className="h-full w-full object-cover object-center"
-                                                                                width={100}
-                                                                                height={100}
-                                                                            />
-                                                                        </div>
+        </tr>
+        {
+            order.items?.map(item => (
+                <tr key={item.id}>
+                    <td colSpan={4} >
+                        <li key={item.product.id} className={`overflow-hidden transition duration-300 ${showOrderItems ? 'h-auto flex py-6 px-2' : 'h-0'}`}>
+                            <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                                <Image
+                                    src={`${BASE_URL}/` + item.product.mainImage}
+                                    alt={item.product.title}
+                                    className="h-full w-full object-cover object-center"
+                                    width={100}
+                                    height={100}
+                                />
+                            </div>
 
-                                                                        <div className="ml-4 flex flex-1 flex-col">
-                                                                            <div>
-                                                                                <div className="flex justify-between text-base font-medium text-gray-900">
-                                                                                    <h3>
-                                                                                        <div>{item.product.title}</div>
-                                                                                        <div className="text-sm">
-                                                                                            {item.variant.name} : {item.variant.value}
-                                                                                        </div>
-                                                                                    </h3>
-                                                                                    <p className="ml-4">
-                                                                                      {'('} {item.quantity} {'x'} {+item.variant.price} =  Rs.{+item.quantity * +item.variant.price} {')'}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex flex-1 items-end justify-between text-sm">
+                            <div className="ml-4 flex flex-1 flex-col">
+                                <div>
+                                    <div className="flex justify-between text-base font-medium text-gray-900">
+                                        <h3>
+                                            <div>{item.product.title}</div>
+                                            <div className="text-sm">
+                                                {item.variant.name} : {item.variant.value}
+                                            </div>
+                                        </h3>
+                                        <p className="ml-4">
+                                            {'('} {item.quantity} {'x'} {+item.variant.price} =  Rs.{+item.quantity * +item.variant.price} {')'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-1 items-end justify-between text-sm">
 
-                                                                            </div>
-                                                                        </div>
-                                                                    </li>
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                    }
-                                                </>)
+                                </div>
+                            </div>
+                        </li>
+                    </td>
+                </tr>
+            ))
+        }
+    </>)
 }
 
 
@@ -252,7 +252,8 @@ const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPo
                                         <span className="font-medium">Phone:</span>
                                         <div className="flex items-center gap-1">
                                             <FaWhatsapp className="text-green-500" />
-                                            <span>{customerDetails?.phone || 'N/A'}</span>
+                                            <a href={`https://wa.me/${customerDetails?.phone}`} target="_blank" className="truncate max-w-xs">{customerDetails?.phone}</a>
+
                                         </div>
                                     </div>
 
@@ -358,7 +359,7 @@ const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPo
                                         </thead>
                                         <tbody>
                                             {customerDetails?.recent_orders.map((order) => (
-                                               <OrderDetailCard order={order} key={order.id} />
+                                                <OrderDetailCard order={order} key={order.id} />
                                             ))}
                                         </tbody>
                                     </table>

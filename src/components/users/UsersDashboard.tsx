@@ -83,7 +83,7 @@ function UsersTable({ data }: { data: Customer[] }) {
               <td className="px-3 py-2 border text-center">
                 <div className="flex items-center space-x-1  whitespace-nowrap">
                   <FaWhatsapp className="h-3 w-3 text-green-500" />
-                  <span>{row.phone ?? 'N/A'}</span>
+                  <a href={`https://wa.me/${row.phone}`} target="_blank" className="truncate max-w-xs">{row.phone}</a>
                 </div>
               </td>
               {/* email address */}
