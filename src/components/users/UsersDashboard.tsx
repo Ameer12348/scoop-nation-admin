@@ -398,7 +398,7 @@ export function UsersDashboard() {
         >
           <SearchAndPaginationWrapper
             searchValue={search}
-            onSearchChange={(value) => { setSearch(value) }}
+            onSearchChange={(value) => { setSearch(value) ; setCurrentPage(1)}}
             currentPage={currentPage}
             totalItems={parseInt(pagination?.total || '0') || 0}
             itemsPerPage={perPage}

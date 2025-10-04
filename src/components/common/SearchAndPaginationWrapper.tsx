@@ -59,7 +59,7 @@ export default function SearchAndPaginationWrapper({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e)=>{
-            e.key === 'Enter' && onSearchChange(search)
+           if( e.key === 'Enter') { onSearchChange(search)}
           }}
           className="w-full max-w-md dark:text-white"
         />
@@ -92,10 +92,10 @@ export default function SearchAndPaginationWrapper({
 
           <Pagination className="justify-center sm:justify-end dark:text-white">
             <PaginationContent>
-              <PaginationItem>
+              <PaginationItem className='cursor-pointer'>
                 <PaginationPrevious
                   onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  className={currentPage === 1 ? 'pointer-events-none cursor-pointer  opacity-50' : ''}
                 />
               </PaginationItem>
 
@@ -104,10 +104,11 @@ export default function SearchAndPaginationWrapper({
                 {currentPage}
                </span>
               </PaginationItem>
-              <PaginationItem>
+              <PaginationItem className='cursor-pointer'>
                 <PaginationNext
+
                   onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  className={currentPage === totalPages ? 'pointer-events-none cursor-pointer opacity-50' : ''}
                 />
               </PaginationItem>
             </PaginationContent>
