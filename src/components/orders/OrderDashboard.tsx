@@ -160,7 +160,7 @@ function OrdersDataTable({ data, showOrderDetails }: { data: Order[], showOrderD
           <thead className="bg-gray-100 text-left text-xs md:text-sm">
             <tr>
               <th className="px-3 py-2 border">ORDER ID</th>
-              <th className="px-3 py-2 border">CUSTOMER Name</th>
+              <th className="px-3 py-2 border">CUSTOMER NAME</th>
               <th className="px-3 py-2 border">ORDER TIME</th>
               <th className="px-3 py-2 border">PAYMENTS TYPE</th>
               <th className="px-3 py-2 border">BRANCH</th>

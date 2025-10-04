@@ -396,7 +396,7 @@ export function UsersDashboard() {
       <div className="bg-white p-4 rounded-lg shadow">
 
         <TableContainerCard
-          title="Orders"
+          title="Customers"
           addButton
           addButtonText="More Filters"
           addButtonAction={() => { setShowMoreFilters(true) }}
