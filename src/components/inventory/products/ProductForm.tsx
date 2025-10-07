@@ -1,20 +1,9 @@
-// components/inventory/products/ProductDataTable.tsx
 'use client'
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
-import { useForm, Resolver } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Form,
     FormControl,
@@ -23,7 +12,11 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import { Pencil, X, Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Assuming you have Shadcn Select
+import Dropzone from '@/components/form/form-elements/DropZone';
+import { Pencil, X, Plus, Trash } from 'lucide-react';
 import TableContainerCard from '@/components/common/TableContainerCard';
 import SearchAndPaginationWrapper from '@/components/common/SearchAndPaginationWrapper';
 import { FaRegEdit } from 'react-icons/fa';
@@ -33,72 +26,57 @@ import Image from 'next/image';
 import ImageGallery, { ImageType } from '@/components/gallery/ImageGallery';
 import { Product } from './ProductDataTable';
 
-interface Section {
+// Define section interface
+export interface Section {
     id: string;
     name: string;
-    description: string;
-    priority: number;
-    availableFrom: string;
-    availableTo: string;
-    appOnly: boolean;
-    days: string[];
-    image?: string;
-    imageId?: string;
 }
-// Mock data for sections
+
+// Define mock sections
 export const mockSections: Section[] = [
     {
         id: '1',
-        name: 'Breakfast',
-        description: 'Morning items',
-        priority: 1,
-        availableFrom: '06:00',
-        availableTo: '11:00',
-        appOnly: false,
-        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        image: '/images/sections/breakfast.jpg'
+        name: 'Ice Cream'
     },
     {
         id: '2',
-        name: 'Lunch',
-        description: 'Afternoon items',
-        priority: 2,
-        availableFrom: '11:00',
-        availableTo: '15:00',
-        appOnly: false,
-        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        image: '/images/sections/lunch.jpg'
+        name: 'Drinks'
     },
     {
         id: '3',
-        name: 'Dinner',
-        description: 'Evening items',
-        priority: 3,
-        availableFrom: '18:00',
-        availableTo: '23:00',
-        appOnly: true,
-        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        image: '/images/sections/dinner.jpg'
+        name: 'Toppings'
     }
 ];
 
+// Product schema based on the provided data structure
+const variantSchema = z.object({
+    name: z.string().min(1, 'Variant name is required'),
+    value: z.string().min(1, 'Variant value is required'),
+    price: z.string().min(1, 'Price is required'),
+    inStock: z.string().min(1, 'Stock is required'),
+    discountType: z.string().nullable(),
+    discountValue: z.string().nullable(),
+    originalPrice: z.string().nullable(),
+    discountStartDate: z.string().nullable(),
+    discountEndDate: z.string().nullable(),
+});
 
 const productSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    description: z.string(),
-    price: z.coerce.number().min(0, 'Price must be at least 0'),
-    discountPrice: z.coerce.number().min(0, 'Discount price must be at least 0').optional(),
-    priority: z.coerce.number().min(1, 'Priority must be at least 1'),
-    calories: z.coerce.number().min(0, 'Calories must be at least 0').optional(),
-    preparationTime: z.coerce.number().min(0, 'Preparation time must be at least 0').optional(),
-    stock: z.coerce.number().min(0, 'Stock must be at least 0'),
-    sections: z.array(z.string()).min(1, 'Select at least one section'),
-    isAvailable: z.boolean(),
-    file: z.instanceof(File).optional(),
-    imageId: z.string().optional(),
-}).refine((data) => data.file || data.imageId, {
-    message: 'An image is required',
-    path: ['image'],
+    title: z.string().min(1, 'Title is required'),
+    slug: z.string().min(1, 'Slug is required'),
+    description: z.string().min(1, 'Description is required'),
+    manufacturer: z.string().min(1, 'Manufacturer is required'),
+    price: z.string().min(1, 'Price is required'),
+    inStock: z.string().min(1, 'Stock is required'),
+    categoryId: z.string().min(1, 'Category is required'),
+    rating: z.string().optional(),
+    discountType: z.string().nullable(),
+    discountValue: z.string().nullable(),
+    originalPrice: z.string().nullable(),
+    discountStartDate: z.string().nullable(),
+    discountEndDate: z.string().nullable(),
+    variants: z.array(variantSchema).min(1, 'At least one variant is required'),
+    media: z.array(z.any()).optional(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
@@ -106,78 +84,95 @@ export type ProductFormData = z.infer<typeof productSchema>;
 interface ProductFormProps {
     mode: 'add' | 'edit';
     onSubmit: (data: ProductFormData) => void;
-    defaultValues?: Product;
+    defaultValues?: Partial<ProductFormData>;
 }
 
-// Product Form Component
 function ProductForm({ mode, onSubmit, defaultValues }: ProductFormProps) {
-    const [preview, setPreview] = useState<string | null>(defaultValues?.image || null);
-    const [selectedImage, setSelectedImage] = useState<ImageType | null>(null);
-    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
+    const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+    const [mainImage, setMainImage] = useState<File | null>(null);
 
-    // Initialize form with default values
     const form = useForm<ProductFormData>({
-        resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
+        resolver: zodResolver(productSchema),
         defaultValues: {
-            name: defaultValues?.name || '',
+            title: defaultValues?.title || '',
+            slug: defaultValues?.slug || '',
             description: defaultValues?.description || '',
-            price: defaultValues?.price || 0,
-            discountPrice: defaultValues?.discountPrice || 0,
-            priority: defaultValues?.priority || 1,
-            calories: defaultValues?.calories || 0,
-            preparationTime: defaultValues?.preparationTime || 0,
-            stock: defaultValues?.stock || 0,
-            sections: defaultValues?.sections || [],
-            isAvailable: defaultValues?.isAvailable ?? true,
-            imageId: defaultValues?.imageId || undefined,
+            manufacturer: defaultValues?.manufacturer || '',
+            price: defaultValues?.price || '',
+            inStock: defaultValues?.inStock || '',
+            categoryId: defaultValues?.categoryId || '',
+            rating: defaultValues?.rating || '0',
+            discountType: defaultValues?.discountType || null,
+            discountValue: defaultValues?.discountValue || null,
+            originalPrice: defaultValues?.originalPrice || null,
+            discountStartDate: defaultValues?.discountStartDate || null,
+            discountEndDate: defaultValues?.discountEndDate || null,
+            variants: defaultValues?.variants || [{
+                name: 'size',
+                value: '',
+                price: '',
+                inStock: '',
+                discountType: null,
+                discountValue: null,
+                originalPrice: null,
+                discountStartDate: null,
+                discountEndDate: null,
+            }],
+            media: defaultValues?.media || []
         },
     });
 
-    // Handle form submission
-    const handleFormSubmit = (data: ProductFormData) => {
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: "variants"
+    });
+
+   
+
+    const handleMediaUpload = (file: File) => {
+        const newFiles = [...mediaFiles, file];
+        setMediaFiles(newFiles);
+        form.setValue('media', newFiles.map(f => URL.createObjectURL(f))); // Sync to form (as URLs for now)
+    };
+
+    const removeMedia = (index: number) => {
+        const newFiles = mediaFiles.filter((_, i) => i !== index);
+        setMediaFiles(newFiles);
+        form.setValue('media', newFiles.map(f => URL.createObjectURL(f)));
+    };
+
+    const handleSubmit = (data: ProductFormData) => {
+        // Here you would typically handle the file uploads first (e.g., to a server)
+        // Then combine the form data with the uploaded file URLs
         onSubmit(data);
     };
 
-    // Handle drag and drop for image upload
-    const handleDrop = useCallback(
-        (e: React.DragEvent<HTMLDivElement>) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsDragging(false);
-            const file = e.dataTransfer.files?.[0];
-            if (file && file.type.startsWith('image/')) {
-                form.setValue('file', file);
-                form.setValue('imageId', undefined);
-                setPreview(URL.createObjectURL(file));
-            }
-        },
-        [form]
-    );
-
-    const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(true);
-    }, []);
-
-    const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-    }, []);
+    const addVariant = () => {
+        append({
+            name: '',
+            value: '',
+            price: '',
+            inStock: '',
+            discountType: null,
+            discountValue: null,
+            originalPrice: null,
+            discountStartDate: null,
+            discountEndDate: null,
+        });
+    };
 
     return (
-        <>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-                    {/* --- Name Field --- */}
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+                {/* Basic Information */}
+                <div className="space-y-4 grid grid-cols-2 gap-2">
+                    <h3 className="text-lg font-semibold col-span-full">Basic Information</h3>
                     <FormField
                         control={form.control}
-                        name="name"
+                        name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>Product Title</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -186,7 +181,20 @@ function ProductForm({ mode, onSubmit, defaultValues }: ProductFormProps) {
                         )}
                     />
 
-                    {/* --- Description Field --- */}
+                    <FormField
+                        control={form.control}
+                        name="slug"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Slug</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
                     <FormField
                         control={form.control}
                         name="description"
@@ -201,7 +209,63 @@ function ProductForm({ mode, onSubmit, defaultValues }: ProductFormProps) {
                         )}
                     />
 
-                    {/* --- Price Field --- */}
+                    <FormField
+                        control={form.control}
+                        name="manufacturer"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Manufacturer</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="categoryId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Category</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {mockSections.map((section) => (
+                                            <SelectItem key={section.id} value={section.id}>
+                                                {section.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="rating"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Rating (optional)</FormLabel>
+                                <FormControl>
+                                    <Input type="text" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                {/* Main Product Details */}
+                <div className="space-y-4  grid grid-cols-2 gap-2">
+                    <h3 className="text-lg font-semibold col-span-full">Pricing and Stock</h3>
                     <FormField
                         control={form.control}
                         name="price"
@@ -209,196 +273,300 @@ function ProductForm({ mode, onSubmit, defaultValues }: ProductFormProps) {
                             <FormItem>
                                 <FormLabel>Price</FormLabel>
                                 <FormControl>
-                                    <Input type="number" step="0.01" {...field} />
+                                    <Input type="text" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
 
-                    {/* --- Discount Price Field --- */}
                     <FormField
                         control={form.control}
-                        name="discountPrice"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Discount Price (Optional)</FormLabel>
-                                <FormControl>
-                                    <Input type="number" step="0.01" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* --- Priority Field --- */}
-                    <FormField
-                        control={form.control}
-                        name="priority"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Priority</FormLabel>
-                                <FormControl>
-                                    <Input type="number" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* --- Calories Field --- */}
-                    <FormField
-                        control={form.control}
-                        name="calories"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Calories (Optional)</FormLabel>
-                                <FormControl>
-                                    <Input type="number" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* --- Preparation Time Field --- */}
-                    <FormField
-                        control={form.control}
-                        name="preparationTime"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Preparation Time (mins)</FormLabel>
-                                <FormControl>
-                                    <Input type="number" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* --- Stock Field --- */}
-                    <FormField
-                        control={form.control}
-                        name="stock"
+                        name="inStock"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Stock</FormLabel>
                                 <FormControl>
-                                    <Input type="number" {...field} />
+                                    <Input type="text" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
 
-                    {/* --- Sections Checkboxes --- */}
+                    {/* Nullable Discount Fields for Product */}
                     <FormField
                         control={form.control}
-                        name="sections"
+                        name="discountType"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Sections</FormLabel>
-                                <div className="space-y-2">
-                                    {mockSections.map((section) => (
-                                        <div key={section.id} className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={section.id}
-                                                checked={field.value?.includes(section.id)}
-                                                onCheckedChange={(checked) => {
-                                                    const newSections = checked
-                                                        ? [...(field.value ?? []), section.id]
-                                                        : field.value?.filter((id: string) => id !== section.id) ?? [];
-                                                    field.onChange(newSections);
-                                                }}
-                                            />
-                                            <label htmlFor={section.id}>{section.name}</label>
-                                        </div>
-                                    ))}
-                                </div>
+                                <FormLabel>Discount Type (optional)</FormLabel>
+                                <FormControl>
+                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
 
-                    {/* --- Available Switch --- */}
                     <FormField
                         control={form.control}
-                        name="isAvailable"
+                        name="discountValue"
                         render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <FormLabel>Available</FormLabel>
+                            <FormItem>
+                                <FormLabel>Discount Value (optional)</FormLabel>
                                 <FormControl>
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                 </FormControl>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
 
-                    {/* --- Image Upload --- */}
-                    <FormItem>
-                        <FormLabel>Image</FormLabel>
-                        {preview && <Image width={140} height={140} src={preview} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
-                        <div className="flex space-x-4 mt-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => document.getElementById('product-file-upload')?.click()}
-                            >
-                                Browse
-                            </Button>
-                            <Button type="button" variant="secondary" onClick={() => setIsGalleryOpen(true)}>
-                                Select From Gallery
-                            </Button>
-                        </div>
-                        <div
-                            className={`border-2 border-dashed rounded-md p-4 text-center mt-2 ${isDragging ? 'border-primary bg-primary/10' : 'border-muted'}`}
-                            onDrop={handleDrop}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                        >
-                            <p>Drag and drop image here</p>
-                        </div>
-                        <Input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            id="product-file-upload"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    form.setValue('file', file);
-                                    form.setValue('imageId', undefined);
-                                    setPreview(URL.createObjectURL(file));
-                                }
-                            }}
-                        />
-                        <p className="text-sm text-muted-foreground mt-2">
-                            Note: Image Resolution ≤ 400x400 px, Size ≤ 200 KB
-                        </p>
-                        <FormMessage />
-                    </FormItem>
-
-                    <Button type="submit">{mode === 'add' ? 'Add Product' : 'Save Changes'}</Button>
-                </form>
-            </Form>
-
-            {/* Gallery Dialog */}
-            <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
-                <DialogContent  className="max-w-4xl max-h-[80vh] overflow-y-auto className='p-0  min-w-[98vw] sm:min-w-[90vw] md:min-w-[700px] lg:min-w-[900px]'">
-                    <ImageGallery
-                        // onSelect={(image) => {
-                        //     setSelectedImage(image);
-                        //     setPreview(image.url);
-                        //     form.setValue('imageId', image.id);
-                        //     form.setValue('file', undefined);
-                        //     setIsGalleryOpen(false);
-                        // }}
+                    <FormField
+                        control={form.control}
+                        name="originalPrice"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Original Price (optional)</FormLabel>
+                                <FormControl>
+                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                </DialogContent>
-            </Dialog>
-        </>
+
+                    <FormField
+                        control={form.control}
+                        name="discountStartDate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Discount Start Date (optional)</FormLabel>
+                                <FormControl>
+                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="discountEndDate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Discount End Date (optional)</FormLabel>
+                                <FormControl>
+                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                {/* Variants Section */}
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Variants</h3>
+                        <Button type="button" variant="outline" onClick={addVariant}>
+                            <Plus size={16} className="mr-2" /> Add Variant
+                        </Button>
+                    </div>
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="p-4 border rounded-lg space-y-4  grid grid-cols-2 gap-2 relative">
+                            {fields.length > 1 && (
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2"
+                                    onClick={() => remove(index)}
+                                >
+                                    <Trash size={16} />
+                                </Button>
+                            )}
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.name`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Name (e.g., size, color)</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.value`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Value (e.g., small, red)</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.price`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Price</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.inStock`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Stock</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Nullable Discount Fields for Variant */}
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.discountType`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Discount Type (optional)</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.discountValue`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Discount Value (optional)</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.originalPrice`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Original Price (optional)</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.discountStartDate`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Discount Start Date (optional)</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name={`variants.${index}.discountEndDate`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Variant Discount End Date (optional)</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Image Upload Section */}
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Images</h3>
+                    
+
+                    <div>
+                        <h4 className="text-md font-medium mb-2">Additional Images</h4>
+                        <Dropzone
+                            acceptedFiles={{
+                                'image/png': [],
+                                'image/jpeg': [],
+                                'image/webp': [],
+                            }}
+                            onDone={handleMediaUpload}
+                        />
+                        <div className="mt-2 flex items-center flex-wrap gap-2">
+
+                       {
+                        mediaFiles.map((file, index) => (
+                            <div key={index} className='relative' >
+                                <Image
+                                    src={URL.createObjectURL(file)}
+                                    alt={`Media ${index + 1}`}
+                                    width={250 }
+                                    height={250}
+                                    className="rounded-lg aspect-square object-contain"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="destructive"   
+                                    size="icon"
+                                    className="absolute top-2 right-2"
+                                    onClick={() => removeMedia(index)}
+                                >
+                                    <X size={16} />
+                                </Button>
+                            </div>
+                        ))
+                       }
+                        </div>
+
+                    </div>
+                </div>
+
+                <Button type="submit">
+                    {mode === 'add' ? 'Add Product' : 'Update Product'}
+                </Button>
+            </form>
+        </Form>
     );
 }
 
-
-export default ProductForm
+export default ProductForm;

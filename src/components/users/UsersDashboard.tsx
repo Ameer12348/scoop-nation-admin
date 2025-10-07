@@ -6,8 +6,8 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Search, Download, Filter, Eye, Loader } from "lucide-react";
-import { FaPhone, FaEnvelope, FaUser, FaMapMarkerAlt, FaTimes, FaCheck, FaPrint, FaEdit, FaWhatsapp } from "react-icons/fa";
+import { Eye, Loader } from "lucide-react";
+import { FaEnvelope, FaUser, FaMapMarkerAlt, FaTimes, FaCheck, FaPrint, FaEdit, FaWhatsapp } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,8 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import * as z from "zod";
 import type { User } from "@/types/UsersTypes";
 import TableContainerCard from "../common/TableContainerCard";
@@ -24,7 +23,7 @@ import SearchAndPaginationWrapper from "../common/SearchAndPaginationWrapper";
 import { Customer } from "@/store/slices/customerSlice";
 import { useCustomers } from "@/store/hooks";
 import UserDetailsPopup from "./UserDetailsPopup";
-import { Sheet, SheetContent, SheetHeader } from "../ui/sheet";
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "../ui/sheet";
 
 interface UsersDashboardProps {
   initialUsers: User[];
@@ -161,7 +160,7 @@ function MoreFiltersModal({ open, onOpenChange,onApply, setFilterForm ,filterFor
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="max-w-md flex flex-col items-stretch">
         <SheetHeader>
-          <DialogTitle>More Filters</DialogTitle>
+          <SheetTitle>More Filters</SheetTitle>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-grow px-4">
           {/* Full Name */}
@@ -268,12 +267,12 @@ function MoreFiltersModal({ open, onOpenChange,onApply, setFilterForm ,filterFor
           </div>
 
         </form>
-        <DialogFooter className="space-x-2 px-4 pb-2">
+        <SheetFooter className="space-x-2 px-4 pb-2">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button type="submit" onClick={handleSubmit}>Apply Filters</Button>
-        </DialogFooter>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

@@ -2,8 +2,8 @@ import api from '@/lib/api';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { toast } from 'sonner';
 
-// Define types based on the API response
-interface BannerMedia {
+
+export interface Media {
   imageID: string;
   type: string;
   title: string;
@@ -15,15 +15,19 @@ interface BannerMedia {
   height: string;
   is_featured: string;
   sort_order: string;
+  productID: string;
+  category_id: string | null;
   banner_position: string;
   banner_url: string | null;
-  banner_target: string;
-  campaign_id: string;
+  banner_target: string | null;
+  campaign_id: string | null;
   status: string;
+  created_by: string;
+  updated_by: string;
   image: string;
   created_at: string;
-  meta: Record<string, any> | [];
 }
+
 
 export interface Banner {
   id: string;
@@ -37,7 +41,7 @@ export interface Banner {
   branch_id: string;
   created_at: string;
   updated_at: string;
-  media: BannerMedia[];
+  media: Media[];
 }
 
 interface BannerState {
