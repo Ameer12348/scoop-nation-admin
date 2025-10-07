@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Assuming you have Shadcn Select
 import Dropzone from '@/components/form/form-elements/DropZone';
-import { Pencil, X, Plus, Trash } from 'lucide-react';
+import { Pencil, X, Plus, Trash, Loader } from 'lucide-react';
 import TableContainerCard from '@/components/common/TableContainerCard';
 import SearchAndPaginationWrapper from '@/components/common/SearchAndPaginationWrapper';
 import { FaRegEdit } from 'react-icons/fa';
@@ -28,6 +28,7 @@ import { Product } from './ProductDataTable';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import ProductFormSkeleton from './ProductFormSkeleton';
 import { fetchProductDetails } from '@/store/slices/productSlice';
+import { error } from 'console';
 
 // Define section interface
 export interface Section {
@@ -79,7 +80,7 @@ const productSchema = z.object({
     discountStartDate: z.string().nullable(),
     discountEndDate: z.string().nullable(),
     variants: z.array(variantSchema).min(1, 'At least one variant is required'),
-    media: z.array(z.any()).optional(),
+    media: z.file()
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
@@ -89,10 +90,11 @@ interface ProductFormProps {
     onSubmit: (data: ProductFormData) => void;
     defaultValues?: Partial<ProductFormData>;
     productId?: string | number; // Add productId prop for edit mode
+    saving?:boolean
 }
 
-function ProductForm({ mode, onSubmit, defaultValues,productId }: ProductFormProps) {
-    const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: ProductFormProps) {
+    const [mediaFiles, setMediaFiles] = useState<File | null>(null);
     const [mainImage, setMainImage] = useState<File | null>(null);
     const {detailsLoading,productDetails,detailsError} = useAppSelector(state=>state.products)
     const dispatch = useAppDispatch()
@@ -123,7 +125,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId }: ProductFormPro
                 discountStartDate: null,
                 discountEndDate: null,
             }],
-            media: defaultValues?.media || []
+            media: undefined
         },
     });
 
@@ -135,15 +137,17 @@ function ProductForm({ mode, onSubmit, defaultValues,productId }: ProductFormPro
    
 
     const handleMediaUpload = (file: File) => {
-        const newFiles = [...mediaFiles, file];
-        setMediaFiles(newFiles);
-        form.setValue('media', newFiles.map(f => URL.createObjectURL(f))); // Sync to form (as URLs for now)
+        console.log('Uploaded file:', file);
+        const newFiles = file;
+        setMediaFiles(file);
+        form.setValue('media', newFiles); // Sync to form (as URLs for now)
     };
 
-    const removeMedia = (index: number) => {
-        const newFiles = mediaFiles.filter((_, i) => i !== index);
-        setMediaFiles(newFiles);
-        form.setValue('media', newFiles.map(f => URL.createObjectURL(f)));
+    const removeMedia = () => {
+        // const newFiles = mediaFiles.filter((_, i) => i !== index);
+        setMediaFiles(null);
+        // form.setValue('media', newFiles.map(f => URL.createObjectURL(f)));
+        form.setValue('media',  null);
     };
 
     const handleSubmit = (data: ProductFormData) => {
@@ -204,7 +208,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId }: ProductFormPro
                     discountStartDate: null,
                     discountEndDate: null,
                 }],
-                media: productDetails.media || []
+                // media: productDetails.media || undefined
             }
             );
         }
@@ -586,18 +590,22 @@ function ProductForm({ mode, onSubmit, defaultValues,productId }: ProductFormPro
                     
 
                     <div>
-                        <h4 className="text-md font-medium mb-2">Additional Images</h4>
+                        <h4 className="text-md font-medium mb-2">Additional Images1</h4>
                         <Dropzone
                             acceptedFiles={{
                                 'image/png': [],
                                 'image/jpeg': [],
                                 'image/webp': [],
+                                'video/mp4': [],
                             }}
                             onDone={handleMediaUpload}
                         />
+                        {form.formState.errors.media && (
+                            <p className="text-sm text-red-600 mt-1">{form.formState.errors.media.message}</p>
+                        )}
                         <div className="mt-2 flex items-center flex-wrap gap-2">
 
-                       {
+                       {/* {
                         mediaFiles.map((file, index) => (
                             <div key={index} className='relative' >
                                 <Image
@@ -618,14 +626,33 @@ function ProductForm({ mode, onSubmit, defaultValues,productId }: ProductFormPro
                                 </Button>
                             </div>
                         ))
-                       }
+                       } */}
+                       {mediaFiles &&  <div className='relative' >
+                                <Image
+                                    src={URL.createObjectURL(mediaFiles)}
+                                    alt={`Media files`}
+                                    width={250 }
+                                    height={250}
+                                    className="rounded-lg aspect-square object-contain"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="destructive"   
+                                    size="icon"
+                                    className="absolute top-2 right-2"
+                                    onClick={() => removeMedia()}
+                                >
+                                    <X size={16} />
+                                </Button>
+                            </div>}
+
                         </div>
 
                     </div>
                 </div>
 
                 <Button type="submit">
-                    {mode === 'add' ? 'Add Product' : 'Update Product'}
+                {  saving ? <><Loader className=' animate-spin'  /></> :  <>{mode === 'add' ? 'Add Product' : 'Update Product'}</>}
                 </Button>
             </form>
         </Form>

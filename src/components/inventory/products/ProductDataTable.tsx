@@ -32,6 +32,9 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useMutation } from '@tanstack/react-query';
+import api from '@/lib/api';
+import { toast } from 'sonner';
 
 
 
@@ -82,23 +85,105 @@ export default function ProductDataTable() {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [showAddFormDialog, setShowAddFormDialog] = useState(false);
     const [editProduct, setEditProduct] = useState<Product | null>(null);
-    const { products, pagination, loading: productsFetchloading, error: productsFetcherror , deleteProduct:{loading:deleteProductLoading} } = useAppSelector(x => x.products)
+    const { products, pagination, loading: productsFetchloading, error: productsFetcherror, deleteProduct: { loading: deleteProductLoading } } = useAppSelector(x => x.products)
     const dispatch = useAppDispatch()
+
+
+    // create product 
+    const { isPending: addProductLoading, mutate: addProduct } = useMutation({
+        mutationFn: async (formData: FormData) => {
+            console.log('formData', formData);
+            const res = await api.post('/api/admin/products', formData, {
+                headers: {
+                    'Content-Type': undefined, // Let browser set multipart/form-data
+                },
+            })
+            return res.data
+        },
+        onSuccess: (data) => {
+            // Invalidate the 'todos' query to refetch the updated list
+            if (data.success) {
+                toast.success(data?.message || 'Product added successfully')
+                setShowAddFormDialog(false);
+                setEditProduct(data.data || null)
+                handleFetchProducts()
+            }
+            else {
+                toast.error(data?.error || data?.message || 'Failed to add product')
+            }
+        },
+        onError: (error) => {
+            console.error('Mutation failed:', error);
+            toast.error(error?.message || 'Failed to add product');
+        },
+    });
+    //update product
+    const { isPending: updateProductLoading, mutate: updateProduct } = useMutation({
+        mutationFn: async ({formData,productId}:{formData: FormData,productId:string|number}) => {
+            console.log('formData', formData);
+            const res = await api.post(`/api/admin/products/update?productId=${productId}`, formData, {
+                headers: {
+                    'Content-Type': undefined, // Let browser set multipart/form-data
+                },
+            })
+            return res.data
+        },
+        onSuccess: (data) => {
+            // Invalidate the 'todos' query to refetch the updated list
+            if (data.success) {
+                toast.success(data?.message || 'Product Updated successfully')
+                setEditProduct(data.data || null)
+                setEditProduct(null)
+                handleFetchProducts()
+            }
+            else {
+                toast.error(data?.error || data?.message || 'Failed to update product')
+            }
+        },
+        onError: (error) => {
+            console.error('Mutation failed:', error);
+            toast.error(error?.message || 'Failed to update product');
+        },
+    });
+
+
 
     // Handle adding a new product
     const handleAdd = (data: ProductFormData) => {
-        console.log('data', data);
-        dispatch(createProduct(data as CreateProductPayload)).then((res) => {
-            console.log('res', res);
-            if (res.meta.requestStatus === 'fulfilled') {
-                setShowAddFormDialog(false)
+        const formData = new FormData();
+        for (const key in data) {
+            const value = data[key as keyof ProductFormData];
+            if (key === 'variants' && value && Array.isArray(value) && value.length > 0) {
+                formData.append('variants', JSON.stringify(value));
+            } else if (key === 'media' && value) {
+                formData.append('media', data.media);
+            } else if (value !== undefined && value !== null) {
+                formData.append(key, value as any);
             }
-        })
+        }
+        addProduct(formData)
+        // dispatch(createProduct(data as CreateProductPayload)).then((res) => {
+        //     console.log('res', res);
+        //     if (res.meta.requestStatus === 'fulfilled') {
+        //         setShowAddFormDialog(false)
+        //     }
+        // })
     };
 
     // Handle editing an existing product
     const handleEdit = (data: ProductFormData) => {
-
+   const formData = new FormData();
+        for (const key in data) {
+            const value = data[key as keyof ProductFormData];
+            if (key === 'variants' && value && Array.isArray(value) && value.length > 0) {
+                formData.append('variants', JSON.stringify(value));
+            } else if (key === 'media' && value) {
+                formData.append('media', data.media);
+            } else if (value !== undefined && value !== null) {
+                formData.append(key, value as any);
+            }
+        }
+        updateProduct({formData,productId:editProduct?.id as string})
     };
 
     // Handle deleting a product
@@ -133,7 +218,7 @@ export default function ProductDataTable() {
                         <DialogHeader>
                             <DialogTitle>Add Product</DialogTitle>
                         </DialogHeader>
-                        <ProductForm mode="add" onSubmit={handleAdd} />
+                        <ProductForm saving={addProductLoading} mode="add" onSubmit={handleAdd} />
                     </div>
                 </DialogContent>
             </Dialog>
@@ -221,8 +306,8 @@ export default function ProductDataTable() {
                                                                         <button
                                                                             className="p-1 text-red-600 hover:text-red-800"
                                                                         >
-                                                                             {
-                                                                                deleteProductLoading ?  <Loader className={`h-4 w-4 animate-spin `} />:   <X size={16} />
+                                                                            {
+                                                                                deleteProductLoading ? <Loader className={`h-4 w-4 animate-spin `} /> : <X size={16} />
                                                                             }
                                                                         </button>
                                                                     </AlertDialogTrigger>
@@ -277,33 +362,33 @@ export default function ProductDataTable() {
                                                         >
                                                             <FaRegEdit size={16} />
                                                         </button>
-                                                         <AlertDialog>
-                                                                    <AlertDialogTrigger asChild>
-                                                                        <button
-                                                                            className="p-1 text-red-600 hover:text-red-800"
-                                                                        >
-                                                                            {
-                                                                                deleteProductLoading ?  <Loader className={`h-4 w-4 animate-spin `} />:   <X size={16} />
-                                                                            }
-                                                                          
-                                                                           
-                                                                        </button>
-                                                                    </AlertDialogTrigger>
-                                                                    <AlertDialogContent>
-                                                                        <AlertDialogHeader>
-                                                                            <AlertDialogTitle>Are you absolutely sure You Want to Delete {product.title} ?</AlertDialogTitle>
-                                                                            {/* <AlertDialogDescription>
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <button
+                                                                    className="p-1 text-red-600 hover:text-red-800"
+                                                                >
+                                                                    {
+                                                                        deleteProductLoading ? <Loader className={`h-4 w-4 animate-spin `} /> : <X size={16} />
+                                                                    }
+
+
+                                                                </button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Are you absolutely sure You Want to Delete {product.title} ?</AlertDialogTitle>
+                                                                    {/* <AlertDialogDescription>
                                                                                 This action cannot be undone. This will permanently delete your
                                                                                 account and remove your data from our servers.
                                                                             </AlertDialogDescription> */}
-                                                                        </AlertDialogHeader>
-                                                                        <AlertDialogFooter>
-                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                            <AlertDialogAction onClick={() => handleDelete(product.id)}
-                                                                            >Continue</AlertDialogAction>
-                                                                        </AlertDialogFooter>
-                                                                    </AlertDialogContent>
-                                                                </AlertDialog>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                    <AlertDialogAction onClick={() => handleDelete(product.id)}
+                                                                    >Continue</AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2 text-sm">
@@ -352,7 +437,7 @@ export default function ProductDataTable() {
                             <DialogTitle>Edit Product</DialogTitle>
                         </DialogHeader>
                         {editProduct && (
-                            <ProductForm mode="edit" onSubmit={handleEdit} productId={editProduct.id} />
+                            <ProductForm mode="edit" onSubmit={handleEdit} saving={updateProductLoading} productId={editProduct.id} />
                         )}
                     </div>
                 </DialogContent>

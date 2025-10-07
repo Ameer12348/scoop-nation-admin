@@ -217,10 +217,10 @@ export const createProduct = createAsyncThunk(
       }
 
       const response = await api.post('/api/admin/products', formData, {
-        // headers: {
-        //   'X-Branch-Id': productData.branchId || 'default-branch-id', // Adjust if needed
-        // },
-      });
+          headers: {
+            'Content-Type': undefined, // Let browser set multipart/form-data
+          },
+        });
 
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to create product');
