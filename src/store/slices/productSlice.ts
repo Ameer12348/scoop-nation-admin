@@ -1,4 +1,5 @@
 
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '..';
 import api from '@/lib/api';
@@ -95,6 +96,9 @@ interface ProductState {
     error: null | string,
     data?: Product | null,
   }
+  deleteProduct:{
+    loading: boolean,
+  }
 }
 
 // Initial state
@@ -110,6 +114,9 @@ const initialState: ProductState = {
     loading: false,
     error: null,
     data: null,
+  },
+  deleteProduct:{
+    loading: false,
   }
 };
 
@@ -233,6 +240,25 @@ export const createProduct = createAsyncThunk(
     }
   }
 );
+
+// Async thunk for deleting a product
+export const deleteProduct = createAsyncThunk(
+  'products/deleteProduct',
+  async (productId: string | number, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/api/admin/products/delete?productId=${productId}`);
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to delete product');
+      }
+      toast.success(response.data.message || 'Product deleted successfully');
+      return productId;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete product';
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 // Create product slice
 const productSlice = createSlice({
   name: 'products',
@@ -287,6 +313,22 @@ const productSlice = createSlice({
       .addCase(createProduct.rejected, (state, action) => {
         state.createProduct.loading = false;
         state.createProduct.error = action.payload as string;
+      })
+      // Delete product cases
+      .addCase(deleteProduct.pending, (state) => {
+        state.deleteProduct.loading = true
+      })
+      .addCase(deleteProduct.fulfilled, (state, action: PayloadAction<string | number>) => {
+        state.deleteProduct.loading = false
+        // Remove deleted product from products array if present
+        state.products = state.products.filter((p) => p.id !== String(action.payload));
+        state.pagination = state.pagination ? {
+          ...state.pagination,
+          total: String(Number(state.pagination.total) - 1),
+        } : null;
+      })
+      .addCase(deleteProduct.rejected, (state) => {
+        state.deleteProduct.loading = false
       });
   },
 });

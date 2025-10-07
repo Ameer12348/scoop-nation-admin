@@ -19,8 +19,22 @@ import Image from 'next/image';
 import ImageGallery, { ImageType } from '@/components/gallery/ImageGallery';
 import ProductForm, { mockSections, ProductFormData, Section } from './ProductForm';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { createProduct, CreateProductPayload, fetchProducts } from '@/store/slices/productSlice';
+import { createProduct, CreateProductPayload, deleteProduct, fetchProducts } from '@/store/slices/productSlice';
 import { BASE_URL } from '@/consts';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+
+
 // Define the Product type
 export interface Product {
     id: string;
@@ -68,12 +82,12 @@ export default function ProductDataTable() {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [showAddFormDialog, setShowAddFormDialog] = useState(false);
     const [editProduct, setEditProduct] = useState<Product | null>(null);
-    const { products, pagination, loading: productsFetchloading, error: productsFetcherror } = useAppSelector(x => x.products)
+    const { products, pagination, loading: productsFetchloading, error: productsFetcherror , deleteProduct:{loading:deleteProductLoading} } = useAppSelector(x => x.products)
     const dispatch = useAppDispatch()
 
     // Handle adding a new product
     const handleAdd = (data: ProductFormData) => {
-        console.log('data',data);
+        console.log('data', data);
         dispatch(createProduct(data as CreateProductPayload)).then((res) => {
             console.log('res', res);
             if (res.meta.requestStatus === 'fulfilled') {
@@ -89,6 +103,11 @@ export default function ProductDataTable() {
 
     // Handle deleting a product
     const handleDelete = (id: string) => {
+        dispatch(deleteProduct(id)).then((res) => {
+            if (res.meta.requestStatus === 'fulfilled') {
+                handleFetchProducts()
+            }
+        })
     };
 
 
@@ -197,12 +216,32 @@ export default function ProductDataTable() {
                                                                 >
                                                                     <FaRegEdit size={16} />
                                                                 </button>
-                                                                <button
-                                                                    onClick={() => handleDelete(product.id)}
-                                                                    className="p-1 text-red-600 hover:text-red-800"
-                                                                >
-                                                                    <X size={16} />
-                                                                </button>
+                                                                <AlertDialog>
+                                                                    <AlertDialogTrigger asChild>
+                                                                        <button
+                                                                            className="p-1 text-red-600 hover:text-red-800"
+                                                                        >
+                                                                             {
+                                                                                deleteProductLoading ?  <Loader className={`h-4 w-4 animate-spin `} />:   <X size={16} />
+                                                                            }
+                                                                        </button>
+                                                                    </AlertDialogTrigger>
+                                                                    <AlertDialogContent>
+                                                                        <AlertDialogHeader>
+                                                                            <AlertDialogTitle>Are you absolutely sure You Want to Delete {product.title} ?</AlertDialogTitle>
+                                                                            {/* <AlertDialogDescription>
+                                                                                This action cannot be undone. This will permanently delete your
+                                                                                account and remove your data from our servers.
+                                                                            </AlertDialogDescription> */}
+                                                                        </AlertDialogHeader>
+                                                                        <AlertDialogFooter>
+                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                            <AlertDialogAction onClick={() => handleDelete(product.id)}
+                                                                            >Continue</AlertDialogAction>
+                                                                        </AlertDialogFooter>
+                                                                    </AlertDialogContent>
+                                                                </AlertDialog>
+
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -238,12 +277,33 @@ export default function ProductDataTable() {
                                                         >
                                                             <FaRegEdit size={16} />
                                                         </button>
-                                                        <button
-                                                            onClick={() => handleDelete(product.id)}
-                                                            className="p-1 text-red-600 hover:text-red-800"
-                                                        >
-                                                            <X size={16} />
-                                                        </button>
+                                                         <AlertDialog>
+                                                                    <AlertDialogTrigger asChild>
+                                                                        <button
+                                                                            className="p-1 text-red-600 hover:text-red-800"
+                                                                        >
+                                                                            {
+                                                                                deleteProductLoading ?  <Loader className={`h-4 w-4 animate-spin `} />:   <X size={16} />
+                                                                            }
+                                                                          
+                                                                           
+                                                                        </button>
+                                                                    </AlertDialogTrigger>
+                                                                    <AlertDialogContent>
+                                                                        <AlertDialogHeader>
+                                                                            <AlertDialogTitle>Are you absolutely sure You Want to Delete {product.title} ?</AlertDialogTitle>
+                                                                            {/* <AlertDialogDescription>
+                                                                                This action cannot be undone. This will permanently delete your
+                                                                                account and remove your data from our servers.
+                                                                            </AlertDialogDescription> */}
+                                                                        </AlertDialogHeader>
+                                                                        <AlertDialogFooter>
+                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                            <AlertDialogAction onClick={() => handleDelete(product.id)}
+                                                                            >Continue</AlertDialogAction>
+                                                                        </AlertDialogFooter>
+                                                                    </AlertDialogContent>
+                                                                </AlertDialog>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2 text-sm">
