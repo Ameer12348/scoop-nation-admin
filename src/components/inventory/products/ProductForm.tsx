@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,6 +25,9 @@ import Image from 'next/image';
 // Import ImageGallery component
 import ImageGallery, { ImageType } from '@/components/gallery/ImageGallery';
 import { Product } from './ProductDataTable';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import ProductFormSkeleton from './ProductFormSkeleton';
+import { fetchProductDetails } from '@/store/slices/productSlice';
 
 // Define section interface
 export interface Section {
@@ -85,12 +88,14 @@ interface ProductFormProps {
     mode: 'add' | 'edit';
     onSubmit: (data: ProductFormData) => void;
     defaultValues?: Partial<ProductFormData>;
+    productId?: string | number; // Add productId prop for edit mode
 }
 
-function ProductForm({ mode, onSubmit, defaultValues }: ProductFormProps) {
+function ProductForm({ mode, onSubmit, defaultValues,productId }: ProductFormProps) {
     const [mediaFiles, setMediaFiles] = useState<File[]>([]);
     const [mainImage, setMainImage] = useState<File | null>(null);
-
+    const {detailsLoading,productDetails,detailsError} = useAppSelector(state=>state.products)
+    const dispatch = useAppDispatch()
     const form = useForm<ProductFormData>({
         resolver: zodResolver(productSchema),
         defaultValues: {
@@ -161,6 +166,64 @@ function ProductForm({ mode, onSubmit, defaultValues }: ProductFormProps) {
         });
     };
 
+
+    useEffect(()=>{  
+        if (mode == 'edit' && productDetails){
+            form.reset({
+                title: productDetails.title || '',
+                slug: productDetails.slug || '',
+                description: productDetails.description || '',
+                manufacturer: productDetails.manufacturer || '',
+                price: productDetails.price || '',
+                inStock: productDetails.inStock || '',
+                categoryId: productDetails.categoryId || '',
+                rating: productDetails.rating || '0',
+                discountType: productDetails.discountType || null,
+                discountValue: productDetails.discountValue || null,
+                originalPrice: productDetails.originalPrice || null,
+                discountStartDate: productDetails.discountStartDate || null,
+                discountEndDate: productDetails.discountEndDate || null,
+                variants: productDetails.variants.length > 0 ? productDetails.variants.map(variant => ({
+                    name: variant.name || '',
+                    value: variant.value || '',
+                    price: variant.price || '',
+                    inStock: variant.inStock || '',
+                    discountType: variant.discountType || null,
+                    discountValue: variant.discountValue || null,
+                    originalPrice: variant.originalPrice || null,
+                    discountStartDate: variant.discountStartDate || null,
+                    discountEndDate: variant.discountEndDate || null,
+                })) : [{
+                    name: 'size',
+                    value: '',
+                    price: '',
+                    inStock: '',
+                    discountType: null,
+                    discountValue: null,
+                    originalPrice: null,
+                    discountStartDate: null,
+                    discountEndDate: null,
+                }],
+                media: productDetails.media || []
+            }
+            );
+        }
+    },[productDetails])
+
+    useEffect(()=>{
+        if (mode == 'edit' && productId){
+            dispatch(fetchProductDetails(productId))
+        }
+    },[productId,mode]);
+
+
+    if (mode == 'edit' && detailsLoading){
+        return <ProductFormSkeleton />
+    }
+    if (mode == 'edit' && detailsError){
+        return <div>Error loading product details: {detailsError}</div>
+    }
+    
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">

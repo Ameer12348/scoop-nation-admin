@@ -292,7 +292,7 @@ export default function ProductDataTable() {
                             <DialogTitle>Edit Product</DialogTitle>
                         </DialogHeader>
                         {editProduct && (
-                            <ProductForm mode="edit" onSubmit={handleEdit} defaultValues={editProduct} />
+                            <ProductForm mode="edit" onSubmit={handleEdit} productId={editProduct.id} />
                         )}
                     </div>
                 </DialogContent>

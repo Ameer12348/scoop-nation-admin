@@ -87,6 +87,9 @@ interface ProductState {
   pagination: Pagination | null;
   loading: boolean;
   error: string | null;
+  productDetails: Product | null,
+  detailsLoading:boolean,
+  detailsError: string | null;
   createProduct:{
     loading: boolean,
     error: null | string,
@@ -100,6 +103,9 @@ const initialState: ProductState = {
   pagination: null,
   loading: false,
   error: null,
+  productDetails:null,
+  detailsLoading:false,
+  detailsError:null,
   createProduct:{
     loading: false,
     error: null,
@@ -138,6 +144,28 @@ export const fetchProducts = createAsyncThunk(
 );
 
 
+// Create async thunk for fetching products
+export const fetchProductDetails = createAsyncThunk(
+  'products/fetchProductDetails',
+  async (id: string | number ,{ rejectWithValue }) => {
+    try {
+      
+      const url = `/api/admin/products/getById?productId=${id}`;
+      
+      const response = await api.get(url);
+      
+      if (!response.data.success) {
+        return rejectWithValue(response.data.error || 'Failed to fetch products');
+      }
+      
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch products');
+    }
+  }
+);
+
+
 
 
 // Async thunk for creating a product
@@ -145,43 +173,66 @@ export const createProduct = createAsyncThunk(
   'products/createProduct',
   async (productData: CreateProductPayload, { rejectWithValue }) => {
     try {
-      console.log('productData', productData);
+      // Validate required fields
+      const requiredFields = ['title', 'description', 'price', 'categoryId'];
+      const missingFields = requiredFields.filter((field) => !productData[field]);
+
+      console.log(productData.media)
+
+      if (missingFields.length > 0) {
+        const errorMessage = `Missing required fields: ${missingFields.join(', ')}`;
+        toast.error(errorMessage);
+        return rejectWithValue(errorMessage);
+      }
+
+      // Validate media
+      if (!productData.media) {
+        const errorMessage = 'Media file is required.';
+        toast.error(errorMessage);
+        return rejectWithValue(errorMessage);
+      }
+
       const formData = new FormData();
-      // Append all fields to formData
+      // Append all fields to FormData
       Object.entries(productData).forEach(([key, value]) => {
-        if (key === 'variants') {
+        if (key === 'variants' && value && Array.isArray(value) && value.length > 0) {
           formData.append('variants', JSON.stringify(value));
-        } else if (key === 'media') {
-          // media can be array of File or string
-          (value as (File | string)[]).forEach((item) => {
-            formData.append('media[]', item);
-          });
-        } else if (key === 'mainImage') {
-          formData.append('mainImage', value as any);
-        } else {
-          if (value !== undefined && value !== null) {
-            formData.append(key, value as any);
-          }
+        } else if (key === 'media' && value) {
+          formData.append('media',productData.media[0]);
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, value as any);
         }
       });
+
+      // Log FormData for debugging
+      for (const [key, value] of formData.entries()) {
+        console.log(`FormData: ${key} = ${value}`);
+      }
+
       const response = await api.post('/api/admin/products', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        // headers: {
+        //   'X-Branch-Id': productData.branchId || 'default-branch-id', // Adjust if needed
+        // },
       });
+
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to create product');
       }
+
       toast.success('Product created successfully');
       return response.data.data;
     } catch (error: any) {
       console.log('error', error);
-      
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to create product';
+      const errorMessage =
+        error.response?.data?.details?.join(', ') ||
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to create product';
       toast.error(errorMessage);
       return rejectWithValue(errorMessage);
     }
   }
 );
-
 // Create product slice
 const productSlice = createSlice({
   name: 'products',
@@ -207,6 +258,22 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string || 'Failed to fetch products';
       })
+      // Fetch product details cases
+      .addCase(fetchProductDetails.pending, (state) => {
+        state.detailsLoading = true;
+        state .productDetails = null;
+        state.detailsError = null;
+      })
+      .addCase(fetchProductDetails.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.detailsLoading = false;
+        state.productDetails = action.payload;
+        state.detailsError = null;
+      })
+      .addCase(fetchProductDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.productDetails = null;
+        state.detailsError = action.payload as string || 'Failed to fetch product details';
+        })
       // Create product cases
       .addCase(createProduct.pending, (state) => {
         state.createProduct.loading = true;
