@@ -1,23 +1,135 @@
 "use client";
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import ComponentCard from "../../common/ComponentCard";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, Accept } from "react-dropzone";
+import { Cropper, CropperRef } from "react-advanced-cropper";
+import 'react-advanced-cropper/dist/style.css';
+import { getAbsoluteZoom, getZoomFactor } from 'advanced-cropper/extensions/absolute-zoom';
+import { Modal } from "@/components/ui/modal";
 
-const DropzoneComponent: React.FC = () => {
-  const onDrop = (acceptedFiles: File[]) => {
-    console.log("Files dropped:", acceptedFiles);
-    // Handle file uploads here
-  };
+type DropzoneProps = {
+  acceptedFiles?: Accept; // react-dropzone accept map
+  fixedRatio?: number; // e.g., 1 (square), 16/9, 4/3
+  onCroppedImage?: (file: File) => void; // optional callback with cropped image
+  onFiles?: (files: File[]) => void; // fallback when not an image or video
+  onDone?: (file: File) => void; // emitted when user confirms (Done) or directly for videos
+};
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
+const Dropzone: React.FC<DropzoneProps> = ({
+  acceptedFiles,
+  fixedRatio,
+  onCroppedImage,
+  onFiles,
+  onDone,
+}) => {
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [localAspect, setLocalAspect] = useState<number | undefined>(fixedRatio);
+  const [zoom, setZoom] = useState(1);
+  const cropperRef = useRef<CropperRef | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<
+    { width: number; height: number; left: number; top: number } | null
+  >(null);
+
+  useEffect(() => {
+    setLocalAspect(fixedRatio);
+  }, [fixedRatio]);
+
+  const onDrop = useCallback(
+    (files: File[]) => {
+      if (!files || files.length === 0) return;
+      const first = files[0];
+      if (first.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImageSrc(reader.result as string);
+          setOriginalFile(first);
+          setCropModalOpen(true);
+        };
+        reader.readAsDataURL(first);
+      } else if (first.type === "video/mp4") {
+        onDone?.(first);
+      } else {
+        onFiles?.(files);
+        console.log("Files dropped:", files);
+      }
+    },
+    [onFiles, onDone]
+  );
+
+  const acceptConfig: Accept | undefined = useMemo(() => {
+    if (acceptedFiles) return acceptedFiles;
+    return {
       "image/png": [],
       "image/jpeg": [],
       "image/webp": [],
       "image/svg+xml": [],
-    },
+      "video/mp4": [],
+    };
+  }, [acceptedFiles]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: acceptConfig,
+    multiple: false,
   });
+
+  const onCropChange = useCallback((cropper: CropperRef) => {
+    const state = cropper.getState();
+    const settings = cropper.getSettings();
+    if (state && settings) {
+      const absoluteZoom = getAbsoluteZoom(state, settings);
+      const calculatedZoom = 1 + absoluteZoom * 2;
+      if (Math.abs(zoom - calculatedZoom) > 0.01) {
+        setZoom(calculatedZoom);
+      }
+      setCroppedAreaPixels(cropper.getCoordinates());
+    }
+  }, [zoom]);
+
+  const onZoomChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newZoom = Number(e.target.value);
+    setZoom(newZoom);
+    if (cropperRef.current) {
+      const cropper = cropperRef.current;
+      const state = cropper.getState();
+      const settings = cropper.getSettings();
+      const targetAbsolute = (newZoom - 1) / 2;
+      const factor = getZoomFactor(state, settings, targetAbsolute);
+      cropper.zoomImage(factor);
+    }
+  }, []);
+
+  const generateCroppedImage = useCallback(async () => {
+    if (!cropperRef.current) return;
+    const cropper = cropperRef.current;
+    const canvas = cropper.getCanvas();
+    if (!canvas) return;
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), originalFile?.type || "image/png", 0.92);
+    });
+    if (!blob) return;
+    const file = new File([blob], originalFile?.name || "cropped.png", {
+      type: blob.type,
+    });
+    onCroppedImage?.(file);
+    onDone?.(file);
+    setCropModalOpen(false);
+    setImageSrc(null);
+    setOriginalFile(null);
+  }, [onCroppedImage, onDone, originalFile]);
+
+  const aspectOptions = [
+    { value: undefined, label: "Free" },
+    { value: 1, label: "1:1 (Square)" },
+    { value: 4 / 3, label: "4:3" },
+    { value: 16 / 9, label: "16:9 (Landscape)" },
+    { value: 9 / 16, label: "9:16 (Portrait)" },
+  ];
+
+  const isFixed = fixedRatio !== undefined;
+
   return (
     <ComponentCard title="Dropzone">
       <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
@@ -61,7 +173,7 @@ const DropzoneComponent: React.FC = () => {
             </h4>
 
             <span className=" text-center mb-5 block w-full max-w-[290px] text-sm text-gray-700 dark:text-gray-400">
-              Drag and drop your PNG, JPG, WebP, SVG images here or browse
+              Drag and drop your PNG, JPG, WebP, SVG images or MP4 videos here or browse
             </span>
 
             <span className="font-medium underline text-theme-sm text-brand-500">
@@ -70,8 +182,86 @@ const DropzoneComponent: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {/* Cropper Modal */}
+      <Modal
+        isOpen={cropModalOpen}
+        onClose={() => {
+          setCropModalOpen(false);
+          setImageSrc(null);
+          setOriginalFile(null);
+        }}
+        className="max-w-[820px] w-[90vw] h-[80vh] p-4 lg:p-6"
+        isFullscreen={false}
+      >
+        <div className="flex flex-col min-h-full">
+          <div className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Crop Image</div>
+          <div className="relative flex-1 bg-gray-100 rounded-xl overflow-hidden dark:bg-gray-800 min-h-full">
+            {imageSrc && (
+              <Cropper
+                ref={cropperRef}
+                src={imageSrc}
+                onChange={onCropChange}
+                stencilProps={{
+                  aspectRatio: localAspect,
+                }}
+                className="cropper"
+              />
+            )}
+          </div>
+          {!isFixed && (
+            <div className="mt-4 flex items-center gap-3">
+              <label className="text-gray-700 dark:text-gray-400">Aspect Ratio:</label>
+              <select
+                value={localAspect ?? "free"}
+                onChange={(e) => {
+                  const val = e.target.value === "free" ? undefined : Number(e.target.value);
+                  setLocalAspect(val);
+                }}
+                className="px-2 py-1 rounded bg-gray-200 dark:bg-gray-700"
+              >
+                {aspectOptions.map((opt) => (
+                  <option key={opt.label} value={opt.value ?? "free"}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="mt-4 flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setCropModalOpen(false);
+                setImageSrc(null);
+                setOriginalFile(null);
+              }}
+              className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-white/90 dark:hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={onZoomChange}
+              />
+              <button
+                type="button"
+                onClick={generateCroppedImage}
+                className="px-4 py-2 rounded-lg bg-brand-500 text-white hover:bg-brand-600"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </ComponentCard>
   );
 };
 
-export default DropzoneComponent;
+export default Dropzone;
