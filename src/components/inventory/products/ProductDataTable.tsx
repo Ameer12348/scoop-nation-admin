@@ -150,13 +150,15 @@ export default function ProductDataTable() {
 
     // Handle adding a new product
     const handleAdd = (data: ProductFormData) => {
+        console.log('handle add',data);
+        
         const formData = new FormData();
         for (const key in data) {
             const value = data[key as keyof ProductFormData];
             if (key === 'variants' && value && Array.isArray(value) && value.length > 0) {
                 formData.append('variants', JSON.stringify(value));
-            } else if (key === 'media' && value) {
-                formData.append('media', data.media);
+            } else if (key === 'file' && value) {
+                formData.append('file', data.file as File);
             } else if (value !== undefined && value !== null) {
                 formData.append(key, value as any);
             }
@@ -177,9 +179,13 @@ export default function ProductDataTable() {
             const value = data[key as keyof ProductFormData];
             if (key === 'variants' && value && Array.isArray(value) && value.length > 0) {
                 formData.append('variants', JSON.stringify(value));
-            } else if (key === 'media' && value) {
-                formData.append('media', data.media);
-            } else if (value !== undefined && value !== null) {
+            } else if (key === 'file' && value) {
+                formData.append('file', data.file as File);
+            }
+            else if (key === 'media' && value) {
+                formData.append('media', JSON.stringify(data.media));
+            }
+            else if (value !== undefined && value !== null) {
                 formData.append(key, value as any);
             }
         }

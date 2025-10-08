@@ -29,6 +29,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import ProductFormSkeleton from './ProductFormSkeleton';
 import { fetchProductDetails } from '@/store/slices/productSlice';
 import { error } from 'console';
+import { BASE_URL } from '@/consts';
 
 // Define section interface
 export interface Section {
@@ -80,8 +81,17 @@ const productSchema = z.object({
     discountStartDate: z.string().nullable(),
     discountEndDate: z.string().nullable(),
     variants: z.array(variantSchema).min(1, 'At least one variant is required'),
-    media: z.file()
-});
+    media: z.array(z.any()).optional(), 
+    file:z.instanceof(File).optional()
+})  .superRefine((data, ctx) => {
+        if (data.file === undefined || data.media?.length === 0  ) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'At least one image must be uploaded',
+                path: ['file'],
+            });
+        }
+    });
 
 export type ProductFormData = z.infer<typeof productSchema>;
 
@@ -125,7 +135,8 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                 discountStartDate: null,
                 discountEndDate: null,
             }],
-            media: undefined
+            media: [],
+            file:undefined
         },
     });
 
@@ -140,14 +151,14 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
         console.log('Uploaded file:', file);
         const newFiles = file;
         setMediaFiles(file);
-        form.setValue('media', newFiles); // Sync to form (as URLs for now)
+        form.setValue('file', newFiles); // Sync to form (as URLs for now)
     };
 
     const removeMedia = () => {
         // const newFiles = mediaFiles.filter((_, i) => i !== index);
         setMediaFiles(null);
         // form.setValue('media', newFiles.map(f => URL.createObjectURL(f)));
-        form.setValue('media',  null);
+        form.reset({file:undefined});
     };
 
     const handleSubmit = (data: ProductFormData) => {
@@ -208,7 +219,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                     discountStartDate: null,
                     discountEndDate: null,
                 }],
-                // media: productDetails.media || undefined
+                media: productDetails.media || []
             }
             );
         }
@@ -600,51 +611,97 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             }}
                             onDone={handleMediaUpload}
                         />
-                        {form.formState.errors.media && (
-                            <p className="text-sm text-red-600 mt-1">{form.formState.errors.media.message}</p>
+                        {form.formState.errors.file && (
+                            <p className="text-sm text-red-600 mt-1">{form.formState.errors.file.message}</p>
                         )}
                         <div className="mt-2 flex items-center flex-wrap gap-2">
 
-                       {/* {
-                        mediaFiles.map((file, index) => (
-                            <div key={index} className='relative' >
-                                <Image
-                                    src={URL.createObjectURL(file)}
-                                    alt={`Media ${index + 1}`}
-                                    width={250 }
-                                    height={250}
-                                    className="rounded-lg aspect-square object-contain"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="destructive"   
-                                    size="icon"
-                                    className="absolute top-2 right-2"
-                                    onClick={() => removeMedia(index)}
-                                >
-                                    <X size={16} />
-                                </Button>
-                            </div>
-                        ))
-                       } */}
-                       {mediaFiles &&  <div className='relative' >
-                                <Image
-                                    src={URL.createObjectURL(mediaFiles)}
-                                    alt={`Media files`}
-                                    width={250 }
-                                    height={250}
-                                    className="rounded-lg aspect-square object-contain"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="destructive"   
-                                    size="icon"
-                                    className="absolute top-2 right-2"
-                                    onClick={() => removeMedia()}
-                                >
-                                    <X size={16} />
-                                </Button>
-                            </div>}
+                            {mediaFiles && (
+                                <div className='relative'>
+                                    {mediaFiles.type.startsWith('image/') ? (
+                                        <Image
+                                            src={URL.createObjectURL(mediaFiles)}
+                                            alt={`Media files`}
+                                            width={250}
+                                            height={250}
+                                            className="rounded-lg aspect-square object-contain"
+                                        />
+                                    ) : mediaFiles.type.startsWith('video/') ? (
+                                        <video
+                                            src={URL.createObjectURL(mediaFiles)}
+                                            width={250}
+                                            height={250}
+                                            className="rounded-lg aspect-square object-contain"
+                                            controls
+                                        />
+                                    ) : null}
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-2 right-2"
+                                        onClick={() => removeMedia()}
+                                    >
+                                        <X size={16} />
+                                    </Button>
+                                </div>
+                            )}
+
+                            {
+                                form.getValues('media') && form.getValues('media')?.map((med, index) => {
+                                   if (med?.mime_type?.startsWith('image/')) {
+                                    return  <div key={index} className='relative' >
+                                        <Image
+                                            src={`${BASE_URL}/`+med.image}
+                                            alt={`Media ${index + 1}`}
+                                            width={250 }
+                                            height={250}
+                                            className="rounded-lg aspect-square object-contain"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute top-2 right-2"
+                                            onClick={() => {    
+                                              const newMedia = form.getValues('media')?.filter((medf) => medf.imageID  !== med.imageID ); 
+                                                form.reset({media:newMedia})
+                                            }}
+                                        >
+                                            <X size={16} />
+                                        </Button>
+                                    </div>
+                                   }
+                                  else if (med?.mime_type?.startsWith('video/')) {
+                                    return  <div key={index} className='relative' >
+                                        <video
+                                            src={`${BASE_URL}/`+med.image}
+                                            width={250 }
+                                            height={250}
+                                            className="rounded-lg aspect-square object-contain"
+                                            controls
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute top-2 right-2"
+                                            onClick={() => {    
+                                                const newMedia = form.getValues('media')?.filter((medf) => medf.imageID  !== med.imageID ); 
+                                                form.reset({media:newMedia})
+                                            }}
+                                        >
+                                            <X size={16} />
+                                        </Button>
+                                    </div>
+                                   }
+                                   
+                                   
+                                   else{
+                                    <></>
+                                   }
+})
+                            }
 
                         </div>
 
