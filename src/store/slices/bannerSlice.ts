@@ -46,18 +46,24 @@ export interface Banner {
 
 interface BannerState {
   banners: Banner[];
+  pagination: null | {
+    limit: number;
+    page: number;
+    total_pages: number;
+    total: string;
+  };
   currentBanner: {
-    data:null | Banner,
-    loading:boolean,
-    error:null | string,
+    data: null | Banner,
+    loading: boolean,
+    error: null | string,
   };
-  updateBanner:{
-    loading:boolean,
-    error:null | string,
+  updateBanner: {
+    loading: boolean,
+    error: null | string,
   };
-  createBanner:{
-    loading:boolean,
-    error:null | string,
+  createBanner: {
+    loading: boolean,
+    error: null | string,
     bannerId: string | null,
   };
   loading: boolean;
@@ -67,18 +73,19 @@ interface BannerState {
 // Initial state
 const initialState: BannerState = {
   banners: [],
-  currentBanner:{
-    data:null,
-    loading:false,
-    error:null,
+  pagination: null,
+  currentBanner: {
+    data: null,
+    loading: false,
+    error: null,
   },
-  updateBanner:{
-    loading:false,
-    error:null,
+  updateBanner: {
+    loading: false,
+    error: null,
   },
-  createBanner:{
-    loading:false,
-    error:null,
+  createBanner: {
+    loading: false,
+    error: null,
     bannerId: null,
   },
   loading: false,
@@ -88,15 +95,25 @@ const initialState: BannerState = {
 // Create async thunk for fetching banners
 export const fetchBanners = createAsyncThunk(
   'banners/fetchBanners',
-  async (_, { rejectWithValue }) => {
+  async (params: { page?: number, limit?: number, search?: string }, { rejectWithValue }) => {
     try {
-      const response = await api.get('/api/banners');
-      
+      const queryParams = new URLSearchParams();
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+
+      const queryString = queryParams.toString();
+      const url = `/api/banners${queryString ? `?${queryString}` : ''}`;
+      const response = await api.get(url);
+
       if (!response.data.success) {
         throw new Error('Failed to fetch banners');
       }
-      
-      return response.data.data;
+
+      return response.data;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
     }
@@ -109,11 +126,11 @@ export const fetchBannerById = createAsyncThunk(
   async (campaignId: string, { rejectWithValue }) => {
     try {
       const response = await api.get(`/api/banners/get?campaignId=${campaignId}`);
-      
+
       if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to fetch banner');
       }
-      
+
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -146,20 +163,20 @@ export const createBanner = createAsyncThunk(
   async (bannerData: CreateBannerPayload, { rejectWithValue }) => {
     try {
       const response = await api.post('/api/banners/create', bannerData);
-      
+
       if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to create banner');
       }
-      
+
       // Show success toast
       toast.success(response.data.message || 'Banner created successfully');
-      
+
       return response.data.data; // Returns the new banner ID
     } catch (error) {
       // Show error toast
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast.error(errorMessage);
-      
+
       return rejectWithValue(errorMessage);
     }
   }
@@ -171,20 +188,20 @@ export const updateBanner = createAsyncThunk(
   async (bannerData: UpdateBannerPayload, { rejectWithValue }) => {
     try {
       const response = await api.post('/api/banners/update', bannerData);
-      
+
       if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to update banner');
       }
-      
+
       // Show success toast
       toast.success(response.data.message || 'Banner updated successfully');
-      
+
       return response.data;
     } catch (error) {
       // Show error toast
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast.error(errorMessage);
-      
+
       return rejectWithValue(errorMessage);
     }
   }
@@ -206,15 +223,24 @@ const bannerSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBanners.fulfilled, (state, action: PayloadAction<Banner[]>) => {
+      .addCase(fetchBanners.fulfilled, (state, action: PayloadAction<{
+        data: Banner[], pagination: {
+          limit: number;
+          page: number;
+          total_pages: number;
+          total: string;
+        }
+      }>) => {
         state.loading = false;
-        state.banners = action.payload;
+        state.banners = action.payload.data;
+        state.pagination = action.payload.pagination;
+
       })
       .addCase(fetchBanners.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Handle fetchBannerById
       .addCase(fetchBannerById.pending, (state) => {
         state.currentBanner.loading = true;
@@ -229,7 +255,7 @@ const bannerSlice = createSlice({
         state.currentBanner.error = action.payload as string;
         state.currentBanner.data = null;
       })
-      
+
       // Handle updateBanner
       .addCase(updateBanner.pending, (state) => {
         state.updateBanner.loading = true;
@@ -243,7 +269,7 @@ const bannerSlice = createSlice({
         state.updateBanner.loading = false;
         state.updateBanner.error = action.payload as string;
       })
-      
+
       // Handle createBanner
       .addCase(createBanner.pending, (state) => {
         state.createBanner.loading = true;
