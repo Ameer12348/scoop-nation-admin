@@ -84,7 +84,7 @@ const productSchema = z.object({
     media: z.array(z.any()).optional(), 
     file:z.instanceof(File).optional()
 })  .superRefine((data, ctx) => {
-        if (data.file === undefined || data.media?.length === 0  ) {
+        if (data.file === undefined && data.media?.length === 0  ) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: 'At least one image must be uploaded',
