@@ -68,12 +68,12 @@ const variantSchema = z.object({
 
 const productSchema = z.object({
     title: z.string().min(1, 'Title is required'),
-    slug: z.string().min(1, 'Slug is required'),
     description: z.string().min(1, 'Description is required'),
-    manufacturer: z.string().min(1, 'Manufacturer is required'),
     price: z.string().min(1, 'Price is required'),
-    inStock: z.string().min(1, 'Stock is required'),
     categoryId: z.string().min(1, 'Category is required'),
+    manufacturer: z.string().min(1, 'Manufacturer is required'),
+    slug: z.string().min(1, 'Slug is required'),
+    inStock: z.string().min(1, 'Stock is required'),
     rating: z.string().optional(),
     discountType: z.string().nullable(),
     discountValue: z.string().nullable(),
@@ -309,7 +309,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                 <FormLabel>Category</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                        <SelectTrigger>
+                                        <SelectTrigger className='w-full'>
                                             <SelectValue placeholder="Select a category" />
                                         </SelectTrigger>
                                     </FormControl>
@@ -333,7 +333,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Rating (optional)</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} />
+                                    <Input  type="number" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -351,7 +351,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Price</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} />
+                                    <Input type="number" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -365,7 +365,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Stock</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} />
+                                    <Input type="number" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -394,7 +394,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Discount Value (optional)</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                    <Input type="number" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -408,7 +408,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Original Price (optional)</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                    <Input type="number" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -422,7 +422,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Discount Start Date (optional)</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                    <Input type="date" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -436,7 +436,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Discount End Date (optional)</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                    <Input type="date" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -500,7 +500,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                     <FormItem>
                                         <FormLabel>Variant Price</FormLabel>
                                         <FormControl>
-                                            <Input type="text" {...field} />
+                                            <Input type="number" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -514,7 +514,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                     <FormItem>
                                         <FormLabel>Variant Stock</FormLabel>
                                         <FormControl>
-                                            <Input type="text" {...field} />
+                                            <Input type="number" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -543,7 +543,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                     <FormItem>
                                         <FormLabel>Variant Discount Value (optional)</FormLabel>
                                         <FormControl>
-                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                            <Input type="number" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -557,7 +557,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                     <FormItem>
                                         <FormLabel>Variant Original Price (optional)</FormLabel>
                                         <FormControl>
-                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                            <Input type="number" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -571,7 +571,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                     <FormItem>
                                         <FormLabel>Variant Discount Start Date (optional)</FormLabel>
                                         <FormControl>
-                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                            <Input type="date" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -585,7 +585,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                     <FormItem>
                                         <FormLabel>Variant Discount End Date (optional)</FormLabel>
                                         <FormControl>
-                                            <Input type="text" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
+                                            <Input type="date" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value || null)} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
