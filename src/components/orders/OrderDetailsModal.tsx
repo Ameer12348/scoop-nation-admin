@@ -248,7 +248,7 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                 <p><strong>Email Address:</strong> bilalnasir@example.com</p> */}
                 <div className="flex flex-col sm:flex-row sm:items-center">
                   <div className="flex-grow">
-                    <strong>Delivery Location:</strong> {currentOrder?.address_id ?? 'N/A'}
+                    <strong>Delivery Location:</strong> {`${currentOrder?.customer_address?.street_address} ${currentOrder?.customer_address?.city} ${currentOrder?.customer_address?.state} `}
                   </div>
                   <Button variant="ghost" size="sm" className="mt-1 sm:mt-0 sm:ml-2 p-0 h-auto w-fit">
                     <FaMapMarkerAlt className="h-3 w-3" />

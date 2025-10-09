@@ -58,6 +58,22 @@ export interface Order {
   address_id: string;
   fullname: string;
   items: OrderItem[];
+  customer_address: {
+    id: string;
+    user_id: string;
+    address_type: string;
+    street_address: string;
+    city: string;
+    state: string;
+    postal_code: string;
+    country: string;
+    is_default: string;
+    created_at: string;
+    updated_at: string;
+    longitude: string;
+    latitude: string;
+  } | null;
+
 }
 
 export interface Pagination {
