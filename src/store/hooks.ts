@@ -26,7 +26,7 @@ export const useBanners = () => {
     error,
     
     // Actions
-    fetchBanners: () => dispatch(fetchBanners()),
+    fetchBanners: (params:{ page?: number, limit?: number, search?: string }) => dispatch(fetchBanners(params)),
     fetchBannerById: (id: string) => dispatch(fetchBannerById(id)),
     updateBannerAction: (bannerData: { id: number, name: string, description: string, start_date: string, end_date: string, is_active: boolean }) => 
       dispatch(updateBanner(bannerData)),

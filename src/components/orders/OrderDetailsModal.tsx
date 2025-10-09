@@ -18,8 +18,17 @@ import { Loader } from "lucide-react";
       case 'pending': return 'outline' as const; // Orange-ish in shadcn
       case 'rejected': return 'destructive' as const; // Red
       case 'accepted': return 'default' as const; // Green-ish
+      case 'dispatched': return 'default' as const; // Green-ish
+      case 'delivered': return 'secondary' as const; // Green-ish
       default: return 'default' as const;
     }
+  };
+   const statusMap: Record<string, string> = {
+    pending: "Pending",
+    rejected: "Rejected",
+    accepted: "Accepted",
+    dispatched: "Dispatched",
+    delivered:"Delivered",
   };
 export default function OrderDetailsModal({ order, open, onOpenChange}: { order: Order; open: boolean; onOpenChange: (open: boolean) => void; }) {
   const {orderDetails:{data:currentOrder,loading:orderDetailsLoading,error:orderDetailsError}} = useAppSelector(x=>x.orders)
@@ -246,14 +255,14 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                 <p><strong>Name:</strong> {currentOrder?.fullname ?? 'N/A'}</p>
                 {/* <p><strong>Phone:</strong> {currentOrder?.phone ?? 'N/A'}</p>
                 <p><strong>Email Address:</strong> bilalnasir@example.com</p> */}
-                <div className="flex flex-col sm:flex-row sm:items-center">
+                <a className="flex flex-col sm:flex-row sm:items-center" href={`https://www.google.com/maps?q=${currentOrder?.customer_address?.latitude},${currentOrder?.customer_address?.longitude}`} target="_blank" rel="noopener noreferrer">
                   <div className="flex-grow">
                     <strong>Delivery Location:</strong> {`${currentOrder?.customer_address?.street_address} ${currentOrder?.customer_address?.city} ${currentOrder?.customer_address?.state} `}
                   </div>
                   <Button variant="ghost" size="sm" className="mt-1 sm:mt-0 sm:ml-2 p-0 h-auto w-fit">
                     <FaMapMarkerAlt className="h-3 w-3" />
                   </Button>
-                </div>
+                </a>
               </div>
             </div>
             <div className="bg-gray-50 p-3 rounded-md"> {/* Right column: Order info */}
@@ -268,7 +277,7 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                   <DropdownMenu>
                     <DropdownMenuTrigger>  <Badge  variant={getStatusVariant(currentOrder?.status as string)} className="text-xs"> {/* Custom variant */}
                       {
-                        updateOrderLoading ? <Loader className="h-3 w-3  animate-spin" /> :  <>{currentOrder?.status ?? 'Unknown'}</>
+                        updateOrderLoading ? <Loader className="h-3 w-3  animate-spin" /> :  <>{statusMap[currentOrder?.status as string] ?? currentOrder?.status?? 'Unknown'}</>
                       }
                      
                     </Badge></DropdownMenuTrigger>
@@ -276,6 +285,8 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                       <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'pending')}}>pending</DropdownMenuLabel>
                       <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'rejected')}}>rejected</DropdownMenuLabel>
                       <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'accepted')}}>accepted</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'accepted')}}>dispatched</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'accepted')}}>delivered</DropdownMenuLabel>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </p>

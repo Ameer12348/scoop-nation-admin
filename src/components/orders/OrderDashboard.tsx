@@ -72,12 +72,16 @@ function OrdersDataTable({ data, showOrderDetails }: { data: Order[], showOrderD
     pending: "Pending",
     rejected: "Rejected",
     accepted: "Accepted",
+    dispatched: "Dispatched",
+    delivered:"Delivered",
   };
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'pending': return 'outline' as const; // Orange-ish in shadcn
       case 'rejected': return 'destructive' as const; // Red
       case 'accepted': return 'default' as const; // Green-ish
+      case 'dispatched': return 'default' as const; // Green-ish
+      case 'delivered': return 'secondary' as const; // Green-ish
       default: return 'default' as const;
     }
   };
@@ -99,7 +103,7 @@ function OrdersDataTable({ data, showOrderDetails }: { data: Order[], showOrderD
         <DropdownMenu>
           <DropdownMenuTrigger>  <Badge variant={getStatusVariant(row.status)} className="text-xs"> {/* Custom variant */}
             {
-              updateOrderLoading ? <Loader className="h-3 w-3  animate-spin" /> : <>{statusMap[row.status] ?? 'Unknown'}</>
+              updateOrderLoading ? <Loader className="h-3 w-3  animate-spin" /> : <>{statusMap[row.status] ?? row.status ?? 'Unknown'}</>
             }
           </Badge></DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -557,7 +561,7 @@ const  fetchAllOrder = ()=>{
           {
             ordersLoading ? <div className="text-center text-gray-500 py-7 flex justify-center items-center">
               <Loader className="h-8 w-8 animate-spin" />
-            </div> : error ? <div className="text-center text-red-500">
+            </div> : error ? <div className="text-center text-red-500 py-7">
               {error}
             </div> :
               orders.length > 0 ? <OrdersDataTable data={orders} showOrderDetails={handleViewDetails} /> :
