@@ -285,8 +285,8 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                       <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'pending')}}>pending</DropdownMenuLabel>
                       <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'rejected')}}>rejected</DropdownMenuLabel>
                       <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'accepted')}}>accepted</DropdownMenuLabel>
-                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'accepted')}}>dispatched</DropdownMenuLabel>
-                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'accepted')}}>delivered</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'dispatched')}}>dispatched</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={()=>{handleUpdateOrder(currentOrder?.id as string,'delivered')}}>delivered</DropdownMenuLabel>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </p>

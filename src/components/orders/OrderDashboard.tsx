@@ -222,6 +222,8 @@ function OrdersDataTable({ data, showOrderDetails }: { data: Order[], showOrderD
                       <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'pending') }}>pending</DropdownMenuLabel>
                       <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'rejected') }}>rejected</DropdownMenuLabel>
                       <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'accepted') }}>accepted</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'dispatched') }}>dispatched</DropdownMenuLabel>
+                      <DropdownMenuLabel className="cursor-pointer" onClick={() => { handleUpdateOrder(row.id, 'delivered') }}>delivered</DropdownMenuLabel>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
