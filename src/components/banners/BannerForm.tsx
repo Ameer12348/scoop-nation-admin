@@ -61,8 +61,8 @@ const schema = z.object({
     startTime: z.string().min(1, 'Start time is required'),
     endTime: z.string().min(1, 'End time is required'),
     priority: z.number().min(1, 'Priority must be at least 1'),
-    linkItem: z.string().optional(),
-    branches: z.array(z.string()).min(0),
+    // linkItem: z.string().optional(),
+    // branches: z.array(z.string()).min(0),
     media: z.array(z.any()).optional(),
     file: z.instanceof(File).optional()
 }).superRefine((data, ctx) => {
@@ -97,7 +97,7 @@ const mockItems: Item[] = [
 
 export function BannerForm({ banner, onSubmit, onCancel, loading }: {
     banner?: Partial<Banner>;
-    onSubmit: (data: Banner) => void;
+    onSubmit: (data: BannerFormData) => void;
     onCancel: () => void;
     loading?: boolean;
 }) {
@@ -108,18 +108,20 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
             startTime: '00:00',
             endTime: '00:00',
             priority: 1,
-            branches: [],
-            linkItem: '',
+            // branches: [],
+            // linkItem: '',
             name: '',
             description: '',
             ...banner,
+            media: [],
+            file: undefined,
         },
     });
 
     const { register, handleSubmit, formState: { errors }, watch, setValue, reset } = form;
 
-    const selectedBranches = watch('branches') || [];
-    const selectedItem = watch('linkItem') || '';
+    // const selectedBranches = watch('branches') || [];
+    // const selectedItem = watch('linkItem') || '';
     const validity = watch('validity');
 
     const [mediaFiles, setMediaFiles] = React.useState<File | null>(null);
@@ -140,7 +142,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
       
         onSubmit({
             ...values,
-        } as Banner);
+        } as BannerFormData);
     };
 
     const handleMediaUpload = (file: File) => {
@@ -156,6 +158,21 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
         form.reset({file:undefined});
     };
 
+
+    const setFormValues = (data:Partial<BannerFormData>)=>{
+        form.reset({
+            validity:form.getValues().validity,
+            name:form.getValues().name,
+            description:form.getValues().description,
+            startTime:form.getValues().startTime,
+            endTime:form.getValues().endTime,
+            priority:form.getValues().priority,
+            file:form.getValues().file,
+            media:form.getValues().media,
+            ...data
+        })
+
+    }
     return (
         <div className="flex h-full flex-col space-y-6 bg-background p-4 md:p-6">
             {/* Header */}
@@ -294,7 +311,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                 </div>
 
                 {/* Link with Item */}
-                <Card>
+                {/* <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Link with Item (optional) <span className="text-muted-foreground">For Web Only</span></CardTitle>
                         <LinkIcon className="h-4 w-4 text-muted-foreground" />
@@ -313,10 +330,10 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                             </SelectContent>
                         </Select>
                     </CardContent>
-                </Card>
+                </Card> */}
 
                 {/* Branches */}
-                <Card>
+                {/* <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Branches</CardTitle>
                         <MapPinIcon className="h-4 w-4 text-muted-foreground" />
@@ -350,7 +367,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                             })}
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
 
 
                 {/* images and media */}
@@ -421,7 +438,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                                         className="absolute top-2 right-2"
                                         onClick={() => {
                                             const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
-                                            form.reset({ media: newMedia })
+                                            setFormValues({ media: newMedia })
                                         }}
                                     >
                                         <X size={16} />
@@ -444,7 +461,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                                         className="absolute top-2 right-2"
                                         onClick={() => {
                                             const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
-                                            form.reset({ media: newMedia })
+                                            setFormValues({ media: newMedia })
                                         }}
                                     >
                                         <X size={16} />

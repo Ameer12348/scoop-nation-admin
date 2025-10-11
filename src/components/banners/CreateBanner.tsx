@@ -71,19 +71,14 @@ export default function CreateBanner() {
     addBanner(bannerFormData);
   };
 
-  const handleCancel = () => {
-    console.log('Banner form cancelled');
 
-    // Optionally reset state or close modal
-    router.push('/banners')
-  };
 
   return (
     <div className=" py-10">
       <BannerForm
         banner={initialBanner}
         onSubmit={handleSubmit}
-        onCancel={handleCancel}
+        onCancel={()=>{router.back()}}
         loading={addBannerLoading}
       />
     </div>

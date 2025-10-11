@@ -183,6 +183,43 @@ const OrderDetailCard = ({ order }: { order: RecentOrder }) => {
 }
 
 
+const FavouriteCard = ({ fav }: { fav: any }) => {
+    const imagePath = fav?.media?.url || fav?.media?.path || fav?.mainImage || '';
+    const imageSrc = imagePath ? `${BASE_URL}/${imagePath}` : '/images/brand/placeholder.png';
+
+    return (
+        <div className="bg-white p-3 rounded-lg border flex gap-3 items-start">
+            <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                <Image
+                    src={imageSrc}
+                    alt={fav?.title || 'product'}
+                    className="h-full w-full object-cover object-center"
+                    width={96}
+                    height={96}
+                />
+            </div>
+
+            <div className="flex-1">
+                <h4 className="font-medium">{fav?.title || 'Untitled'}</h4>
+                <p className="text-sm text-gray-600">PKR {fav?.price ? parseFloat(fav.price).toFixed(2) : '0.00'}</p>
+
+                {fav?.variants && Array.isArray(fav.variants) && fav.variants.length > 0 && (
+                    <ul className="mt-2 text-sm space-y-1">
+                        {fav.variants.map((v: any) => (
+                            <li key={v.id} className="text-gray-700">
+                                {v.name}: {v.value} {v.price ? `— PKR ${parseFloat(v.price).toFixed(2)}` : ''}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                {/* <a href={`/product/${fav?.slug || fav?.id}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline mt-2 inline-block">View product</a> */}
+            </div>
+        </div>
+    );
+};
+
+
 
 const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPopupProps) => {
     const { fetchCustomerDetails, customerDetails, detailsLoading, detailsError } = useCustomers()
@@ -229,9 +266,10 @@ const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPo
                 </DialogHeader>
 
                 <Tabs defaultValue="details" className="w-full" onValueChange={setActiveTab}>
-                    <TabsList className="grid grid-cols-2 mb-4">
+                    <TabsList className="grid grid-cols-3 gap-2 mb-4">
                         <TabsTrigger value="details">User Information</TabsTrigger>
                         <TabsTrigger value="orders">Order History</TabsTrigger>
+                        <TabsTrigger value="favourites">Favourites Products</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="details" className="space-y-6">
@@ -392,6 +430,29 @@ const UserDetailsPopup = ({ userId, open, onOpenChange, loading }: UserDetailsPo
                                         : '0.00'}
                                 </p>
                             </div>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="favourites" className="space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          
+                            {/* Handle favourites being an array, a single object, or absent */}
+                            {customerDetails?.favourites && (
+                                Array.isArray(customerDetails.favourites) ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {customerDetails.favourites.map((fav: any) => (
+                                            <FavouriteCard fav={fav} key={fav.id || fav.slug || Math.random()} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <FavouriteCard fav={customerDetails.favourites} />
+                                )
+                            )}
+
+                            {!customerDetails?.favourites || (Array.isArray(customerDetails?.favourites) && customerDetails.favourites.length === 0) ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    <p>No favourite products available</p>
+                                </div>
+                            ) : null}
                         </div>
                     </TabsContent>
                 </Tabs>

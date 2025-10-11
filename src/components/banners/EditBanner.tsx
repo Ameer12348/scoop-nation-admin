@@ -102,6 +102,7 @@ const EditBanner = ({ id }: { id: string }) => {
             media: currentBanner.data?.media || null,
 
           }}
+          onCancel={()=>{router.back()}}
             onSubmit={handleUpdate}
           loading={updateBannerLoading}
              />

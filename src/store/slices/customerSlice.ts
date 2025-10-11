@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '..';
 import api from '@/lib/api';
+import { Media } from './bannerSlice';
 
 // Define Customer type based on API response
 export interface Customer {
@@ -14,6 +15,7 @@ export interface Customer {
   user_role: string;
   user_created_at: string;
   total_orders: string;
+  total_favourites?: string;
   total_revenue: string;
   first_ordered_at: string | null;
   last_ordered_at: string | null;
@@ -93,6 +95,10 @@ export interface CustomerDetails {
   last_order_date: string;
   average_order_value: string;
   recent_orders: RecentOrder[];
+  favourites:Product & {
+  media: Media;
+  variants: Variant[];
+};
 }
 
 // Define pagination type

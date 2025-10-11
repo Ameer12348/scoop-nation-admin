@@ -64,7 +64,7 @@ function UsersTable({ data }: { data: Customer[] }) {
             <th className="px-3 py-2 border whitespace-nowrap">TOTAL REVENUE	</th>
             <th className="px-3 py-2 border whitespace-nowrap">FIRST ORDERED AT	</th>
             <th className="px-3 py-2 border whitespace-nowrap">LAST ORDERED AT	</th>
-            {/* <th className="px-3 py-2 border whitespace-nowrap">SOCIAL PLATFORM	</th> */}
+            <th className="px-3 py-2 border whitespace-nowrap">Total Favourites</th>
             <th className="px-3 py-2 border whitespace-nowrap">BLACKLIST ACTION	</th>
             <th className="px-3 py-2 border whitespace-nowrap">ACTION</th>
           </tr>
@@ -109,9 +109,9 @@ function UsersTable({ data }: { data: Customer[] }) {
                 {row.last_ordered_at ? format(row.last_ordered_at, "dd MMM yyyy") : 'N/A'}
               </td>
               {/* social platform */}
-              {/* <td className="px-3 py-2 border text-center  whitespace-nowrap">
-                <Badge variant="secondary">{row.socialPlatform ?? 'Local Signup'}</Badge>               
-              </td> */}
+              <td className="px-3 py-2 border text-center  whitespace-nowrap">
+                {row.total_favourites ?? 0}
+              </td>
               {/* blacklist action */}
               <td className="px-3 py-2 border text-center  whitespace-nowrap">
                 <div className="flex space-x-1">

@@ -7,6 +7,7 @@ import { FaRegEdit } from "react-icons/fa";
 import Switch from "../form/switch/Switch";
 import { Banner } from "@/store/slices/bannerSlice";
 import Link from "next/link";
+import { BASE_URL } from "@/consts";
 
 
 
@@ -52,7 +53,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                   </td> */}
                   <td className="px-3 py-2 border">
                       <Image
-                        src={'/'}
+                        src={`${BASE_URL}/`+item.media[0].image}
                         alt="web banner"
                         width={90}
                         height={55}
@@ -99,7 +100,7 @@ export default function BannerTable({banners}:BannerTableProps) {
             >
               <div className="flex items-center justify-between">
                 <Image
-                  src={'/'}
+                  src={`${BASE_URL}/`+item.media[0].image}
                   alt="webbanner"
                   width={100}
                   height={60}
