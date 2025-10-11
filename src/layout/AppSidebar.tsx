@@ -40,6 +40,7 @@ const navItems: NavItem[] = [
     name: "Settings",
     subItems: [
       { name: "Banners", path: "/banners",  },
+      { name: "Company Settings", path: "/settings",  },
     ],
   },
   {
