@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from 'date-fns';
 import { z } from 'zod';
-import { CalendarIcon, ClockIcon, LinkIcon, MapPinIcon, ImageIcon, SettingsIcon, Loader } from 'lucide-react';
+import { CalendarIcon, ClockIcon, LinkIcon, MapPinIcon, ImageIcon, SettingsIcon, Loader, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,8 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
+import Dropzone from '../form/form-elements/DropZone';
+import { BASE_URL } from '@/consts';
 
 interface Banner {
     id?: string | number;
@@ -64,9 +66,19 @@ const schema = z.object({
     priority: z.number().min(1, 'Priority must be at least 1'),
     linkItem: z.string().optional(),
     branches: z.array(z.string()).min(0),
+    media: z.array(z.any()).optional(),
+    file: z.instanceof(File).optional()
+}).superRefine((data, ctx) => {
+    if (data.file === undefined && data.media?.length === 0) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'At least one image must be uploaded',
+            path: ['file'],
+        });
+    }
 });
 
-type FormData = z.infer<typeof schema>;
+export type BannerFormData = z.infer<typeof schema>;
 
 const mockBranches: Branch[] = [
     { id: '1', name: 'Globe Trotter, 100 C Gulberg', address: '31 43 92 78 166, City: Lahore' },
@@ -92,7 +104,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
     onCancel: () => void;
     loading?: boolean;
 }) {
-    const form = useForm<FormData>({
+    const form = useForm<BannerFormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             validity: { from: new Date(), to: new Date() },
@@ -101,8 +113,8 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
             priority: 1,
             branches: [],
             linkItem: '',
-            name:'',
-            description:'',
+            name: '',
+            description: '',
             ...banner,
         },
     });
@@ -115,8 +127,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
 
     const [appBannerPreview, setAppBannerPreview] = React.useState<string | null>(banner?.appBannerPreview || null);
     const [webBannerPreview, setWebBannerPreview] = React.useState<string | null>(banner?.webBannerPreview || null);
-    const [appFile, setAppFile] = React.useState<File | null>(null);
-    const [webFile, setWebFile] = React.useState<File | null>(null);
+    const [mediaFiles, setMediaFiles] = React.useState<File | null>(null);
 
     React.useEffect(() => {
         if (banner) {
@@ -129,54 +140,25 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
         }
     }, [banner, reset]);
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'app' | 'web') => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // Basic validation: size <= 300KB
-        if (file.size > 400 * 1024) {
-            alert('Image size should be less than or equal to 300KB');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new window.Image();
-            img.onload = () => {
-                // const isApp = type === 'app';
-                // const expectedWidth = isApp ? 800 : 1520;
-                // const expectedHeight = isApp ? 362 : 460;
-                // if (img.width !== expectedWidth || img.height !== expectedHeight) {
-                //   alert(`Image dimensions should be ${expectedWidth}x${expectedHeight} pixels`);
-                //   return;
-                // }
-
-                // Set preview
-                if (type === 'app') {
-                    setAppBannerPreview(e.target?.result as string);
-                    setAppFile(file);
-                } else {
-                    setWebBannerPreview(e.target?.result as string);
-                    setWebFile(file);
-                }
-            };
-            img.src = e.target?.result as string;
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const onFormSubmit = (values: FormData) => {
-        if (!appFile) {
-            alert('App banner image is required');
-            return;
-        }
+  
+    const onFormSubmit = (values: BannerFormData) => {
+      
         onSubmit({
             ...values,
-            appBannerImage: appFile,
-            appBannerPreview,
-            webBannerImage: webFile,
-            webBannerPreview,
         } as Banner);
+    };
+
+    const handleMediaUpload = (file: File) => {
+        console.log('Uploaded file:', file);
+        const newFiles = file;
+        setMediaFiles(file);
+        form.setValue('file', newFiles); // Sync to form (as URLs for now)
+    };
+    const removeMedia = () => {
+        // const newFiles = mediaFiles.filter((_, i) => i !== index);
+        setMediaFiles(null);
+        // form.setValue('media', newFiles.map(f => URL.createObjectURL(f)));
+        form.reset({file:undefined});
     };
 
     return (
@@ -275,7 +257,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                         </div>
                         {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
                     </div>
-                    
+
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="space-y-2">
@@ -376,67 +358,112 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                 </Card>
 
 
-                {/* Images */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    {/* App Banner Image */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium flex items-center space-x-2">
-                                <ImageIcon className="h-4 w-4" />
-                                <span>App Banner Image <span className="text-destructive">*</span> (Required)</span>
-                            </CardTitle>
-                            <CardDescription>Note: Image should be equal to 800x362 pixels and Size should be less than or equal to 300KB.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Input
-                                id="appBanner"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageUpload(e, 'app')}
-                                className="mb-4"
-                            />
-                            {appBannerPreview && (
-                                <Image
-                                    width={200}
-                                    height={200}
-                                    src={appBannerPreview}
-                                    alt="App Banner Preview"
-                                    className="h-32 w-full rounded-md object-cover"
-                                />
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Web Banner Image */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium flex items-center space-x-2">
-                                <ImageIcon className="h-4 w-4" />
-                                <span>Web Banner Image</span>
-                            </CardTitle>
-                            <CardDescription>Note: Image should be equal to 1520x460 pixels and Size should be less than or equal to 300KB.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Input
-                                id="webBanner"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageUpload(e, 'web')}
-                                className="mb-4"
-                            />
-                            {webBannerPreview && (
-                                <Image
-                                    width={200}
-                                    height={200}
-                                    src={webBannerPreview}
-                                    alt="Web Banner Preview"
-                                    className="h-32 w-full rounded-md object-cover"
-                                />
-                            )}
-                        </CardContent>
-                    </Card>
+                {/* images and media */}
+                <div>
+                    <h4 className="text-md font-medium mb-2">Additional Images1</h4>
+                    <Dropzone
+                        acceptedFiles={{
+                            'image/png': [],
+                            'image/jpeg': [],
+                            'image/webp': [],
+                            'video/mp4': [],
+                        }}
+                        onDone={handleMediaUpload}
+                    />
+                    {form.formState.errors.file && (
+                        <p className="text-sm text-red-600 mt-1">{form.formState.errors.file.message}</p>
+                    )}
                 </div>
+                <div className="mt-2 flex items-center flex-wrap gap-2">
 
+                    {mediaFiles && (
+                        <div className='relative'>
+                            {mediaFiles.type.startsWith('image/') ? (
+                                <Image
+                                    src={URL.createObjectURL(mediaFiles)}
+                                    alt={`Media files`}
+                                    width={250}
+                                    height={250}
+                                    className="rounded-lg aspect-square object-contain"
+                                />
+                            ) : mediaFiles.type.startsWith('video/') ? (
+                                <video
+                                    src={URL.createObjectURL(mediaFiles)}
+                                    width={250}
+                                    height={250}
+                                    className="rounded-lg aspect-square object-contain"
+                                    controls
+                                />
+                            ) : null}
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2"
+                                onClick={() => removeMedia()}
+                            >
+                                <X size={16} />
+                            </Button>
+                        </div>
+                    )}
+
+                    {
+                        form.getValues('media') && form.getValues('media')?.map((med, index) => {
+                            if (med?.mime_type?.startsWith('image/')) {
+                                return <div key={index} className='relative' >
+                                    <Image
+                                        src={`${BASE_URL}/` + med.image}
+                                        alt={`Media ${index + 1}`}
+                                        width={250}
+                                        height={250}
+                                        className="rounded-lg aspect-square object-contain"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-2 right-2"
+                                        onClick={() => {
+                                            const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
+                                            form.reset({ media: newMedia })
+                                        }}
+                                    >
+                                        <X size={16} />
+                                    </Button>
+                                </div>
+                            }
+                            else if (med?.mime_type?.startsWith('video/')) {
+                                return <div key={index} className='relative' >
+                                    <video
+                                        src={`${BASE_URL}/` + med.image}
+                                        width={250}
+                                        height={250}
+                                        className="rounded-lg aspect-square object-contain"
+                                        controls
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-2 right-2"
+                                        onClick={() => {
+                                            const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
+                                            form.reset({ media: newMedia })
+                                        }}
+                                    >
+                                        <X size={16} />
+                                    </Button>
+                                </div>
+                            }
+
+
+                            else {
+                                <></>
+                            }
+                        })
+                    }
+
+                </div>
                 {/* Actions */}
                 <div className="flex justify-end space-x-2 pt-4">
                     <Button type="button" variant="outline" onClick={onCancel}>
