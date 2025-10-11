@@ -203,7 +203,7 @@ export const SettingForm: React.FC = () => {
   // Render error state
   if (fetchCompanyError) {
     return (
-      <div className="text-destructive">
+      <div className="text-destructive py-5">
         Failed to load company data. Please try again later.
       </div>
     );
@@ -245,6 +245,8 @@ export const SettingForm: React.FC = () => {
       <div className="space-y-2">
         <Label>Company Logo</Label>
         <Dropzone
+        showTitle={false}
+        description='Only image formats png, jpeg, webp and svg+xml are acceptable'
           acceptedFiles={{
             'image/png': [],
             'image/jpeg': [],
@@ -256,6 +258,7 @@ export const SettingForm: React.FC = () => {
             setValue('file', file);
             setValue('logo', '');
           }}
+          className='!p-2'
         />
         {errors.file && (
           <p className="text-sm text-destructive">{errors.file.message as string}</p>

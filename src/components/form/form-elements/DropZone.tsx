@@ -13,6 +13,11 @@ type DropzoneProps = {
   onCroppedImage?: (file: File) => void; // optional callback with cropped image
   onFiles?: (files: File[]) => void; // fallback when not an image or video
   onDone?: (file: File) => void; // emitted when user confirms (Done) or directly for videos
+  title?:string;
+  description?:string;
+  showTitle?:boolean;
+  showDescription?:boolean;
+  className?: string;
 };
 
 const Dropzone: React.FC<DropzoneProps> = ({
@@ -21,6 +26,11 @@ const Dropzone: React.FC<DropzoneProps> = ({
   onCroppedImage,
   onFiles,
   onDone,
+  title,
+  description,
+  showTitle=true,
+  showDescription=true,
+  className,
 }) => {
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -131,8 +141,8 @@ const Dropzone: React.FC<DropzoneProps> = ({
   const isFixed = fixedRatio !== undefined;
 
   return (
-    <ComponentCard title="Dropzone">
-      <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
+    <>
+      <div className={`transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500`}>
         <div
           {...getRootProps()}
           className={`dropzone rounded-xl   border-dashed border-gray-300 p-7 lg:p-10
@@ -141,6 +151,9 @@ const Dropzone: React.FC<DropzoneProps> = ({
             ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
             : "border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
         }
+
+
+        ${className || ''}
       `}
           id="demo-upload"
         >
@@ -168,14 +181,20 @@ const Dropzone: React.FC<DropzoneProps> = ({
             </div>
 
             {/* Text Content */}
-            <h4 className="mb-3 font-semibold text-gray-800 text-theme-xl dark:text-white/90">
-              {isDragActive ? "Drop Files Here" : "Drag & Drop Files Here"}
+          {
+            showTitle &&
+             <h4 className="mb-3 font-semibold text-gray-800 text-theme-xl dark:text-white/90">
+             {
+              title? title : <>  {isDragActive ? "Drop Files Here" : "Drag & Drop Files Here"}  </>
+             }
             </h4>
+          }
 
-            <span className=" text-center mb-5 block w-full max-w-[290px] text-sm text-gray-700 dark:text-gray-400">
-              Drag and drop your PNG, JPG, WebP, SVG images or MP4 videos here or browse
+            {
+              showDescription && <span className=" text-center mb-3 block w-full max-w-[290px] text-sm text-gray-700 dark:text-gray-400">
+            { description  ? description :" Drag and drop your PNG, JPG, WebP, SVG images or MP4 videos here or browse"}
             </span>
-
+            }
             <span className="font-medium underline text-theme-sm text-brand-500">
               Browse File
             </span>
@@ -260,7 +279,7 @@ const Dropzone: React.FC<DropzoneProps> = ({
           </div>
         </div>
       </Modal>
-    </ComponentCard>
+    </>
   );
 };
 
