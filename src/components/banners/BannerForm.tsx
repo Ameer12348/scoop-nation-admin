@@ -23,6 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Image from 'next/image';
 import Dropzone from '../form/form-elements/DropZone';
 import { BASE_URL } from '@/consts';
+import { Media } from '@/store/slices/bannerSlice';
 
 interface Banner {
     id?: string | number;
@@ -30,14 +31,10 @@ interface Banner {
     startTime: string;
     endTime: string;
     priority: number;
-    linkItem?: string;
     branches: string[];
     name: string;
     description: string;
-    appBannerImage?: File | null;
-    appBannerPreview?: string;
-    webBannerImage?: File | null;
-    webBannerPreview?: string;
+    media?: Array<Media> | null;
 }
 
 
@@ -125,8 +122,6 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
     const selectedItem = watch('linkItem') || '';
     const validity = watch('validity');
 
-    const [appBannerPreview, setAppBannerPreview] = React.useState<string | null>(banner?.appBannerPreview || null);
-    const [webBannerPreview, setWebBannerPreview] = React.useState<string | null>(banner?.webBannerPreview || null);
     const [mediaFiles, setMediaFiles] = React.useState<File | null>(null);
 
     React.useEffect(() => {
@@ -136,7 +131,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                 validity: banner.validity || { from: new Date(), to: new Date() },
                 priority: banner.priority || 1,
                 branches: banner.branches || [],
-            } as Banner);
+            } as BannerFormData);
         }
     }, [banner, reset]);
 
@@ -360,7 +355,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
 
                 {/* images and media */}
                 <div>
-                    <h4 className="text-md font-medium mb-2">Additional Images1</h4>
+                    <h4 className="text-md font-medium mb-2">Web Banner Images</h4>
                     <Dropzone
                         acceptedFiles={{
                             'image/png': [],
@@ -368,6 +363,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                             'image/webp': [],
                             'video/mp4': [],
                         }}
+                        fixedRatio={1440/500}
                         onDone={handleMediaUpload}
                     />
                     {form.formState.errors.file && (

@@ -2,18 +2,61 @@
 import { useAppSelector, useBanners } from "@/store/hooks";
 import { Loader } from "lucide-react";
 import { useEffect } from "react";
-import { BannerForm } from "./BannerForm";
+import { BannerForm, BannerFormData } from "./BannerForm";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import api from "@/lib/api";
 
 const EditBanner = ({ id }: { id: string }) => {
-  const { currentBanner, fetchBannerById, updateBannerAction, } = useBanners();
-  const {loading:updateBannerLoading} = useAppSelector(x=>x.banners.updateBanner)
+  const { currentBanner, fetchBannerById, } = useBanners();
   const router = useRouter();
+
+  const { isPending: updateBannerLoading, mutate: updateBanner } = useMutation({
+    mutationFn: async ({ formData, productId }: { formData: FormData, productId: string | number }) => {
+      console.log('formData', formData);
+      const res = await api.post(`/api/banners/update`, formData, {
+        headers: {
+          'Content-Type': undefined, // Let browser set multipart/form-data
+        },
+      })
+      return res.data
+    },
+    onSuccess: (data) => {
+      // Invalidate the 'todos' query to refetch the updated list
+      if (data.success) {
+        toast.success(data?.message || 'Product Updated successfully')
+      }
+      else {
+        toast.error(data?.error || data?.message || 'Failed to update product')
+      }
+    },
+    onError: (error) => {
+      console.error('Mutation failed:', error);
+      toast.error(error?.message || 'Failed to update product');
+    },
+  });
+
+
+
+
   useEffect(() => {
     fetchBannerById(id);
   }, [id]);
 
-  
+  const handleUpdate = (data: BannerFormData) => {
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('name', data.name || '');
+    formData.append('description', data.description || '');
+    formData.append('start_date', new Date(new Date(data.validity.from).toISOString().substring(0, 10) + ' ' + data.startTime).toISOString());
+    formData.append('end_date', new Date(new Date(data.validity.to).toISOString().substring(0, 10) + ' ' + data.endTime).toISOString());
+    formData.append('is_active', true.toString()); // New banners are inactive by default
+    formData.append('priority', data.priority.toString());
+    formData.append('file', data.file as File);
+    formData.append('media', JSON.stringify(data.media || []));
+    updateBanner({ formData, productId: id });
+  }
 
   return (
     <div className="min-h-[70vh] relative">
@@ -56,24 +99,12 @@ const EditBanner = ({ id }: { id: string }) => {
             },
             name: currentBanner.data?.name || '',
             description: currentBanner.data?.description || '',
-          }} 
-          onSubmit={(data) => {
-            console.log(data);
-            
-            
-            updateBannerAction({
-              id:Number(id),
-              name:data.name,
-              description:data.description,
-              start_date: new Date(new Date(data.validity.from).toISOString().substring(0, 10) + ' ' + data.startTime).toISOString(),
-              end_date:  new Date(new Date(data.validity.to).toISOString().substring(0, 10) + ' ' + data.endTime).toISOString(),
-              is_active:true,
-            })
-            
-           }} onCancel={() => {
-            router.push('/banners')
-          }} />
+            media: currentBanner.data?.media || null,
+
+          }}
+            onSubmit={handleUpdate}
           loading={updateBannerLoading}
+             />
         </div>
       )}
     </div>

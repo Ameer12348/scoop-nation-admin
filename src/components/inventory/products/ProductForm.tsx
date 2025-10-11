@@ -601,7 +601,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                     
 
                     <div>
-                        <h4 className="text-md font-medium mb-2">Additional Images1</h4>
+                        <h4 className="text-md font-medium mb-2">Additional Images</h4>
                         <Dropzone
                             acceptedFiles={{
                                 'image/png': [],
