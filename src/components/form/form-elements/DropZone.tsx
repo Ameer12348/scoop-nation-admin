@@ -6,6 +6,7 @@ import { Cropper, CropperRef } from "react-advanced-cropper";
 import 'react-advanced-cropper/dist/style.css';
 import { getAbsoluteZoom, getZoomFactor } from 'advanced-cropper/extensions/absolute-zoom';
 import { Modal } from "@/components/ui/modal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type DropzoneProps = {
   acceptedFiles?: Accept; // react-dropzone accept map
@@ -203,21 +204,26 @@ const Dropzone: React.FC<DropzoneProps> = ({
       </div>
 
       {/* Cropper Modal */}
-      <Modal
-        isOpen={cropModalOpen}
-        onClose={() => {
+      <Dialog
+        open={cropModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
           setCropModalOpen(false);
           setImageSrc(null);
           setOriginalFile(null);
+          }
         }}
-        className="max-w-[820px] w-[90vw] h-[80vh] p-4 lg:p-6"
-        isFullscreen={false}
       >
-        <div className="flex flex-col min-h-full">
-          <div className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Crop Image</div>
-          <div className="relative flex-1 bg-gray-100 rounded-xl overflow-hidden dark:bg-gray-800 min-h-full">
-            {imageSrc && (
-              <Cropper
+        <DialogContent className="min-w-[90vw] xl:max-w-[1100px] w-[90vw]  p-0 overflow-hidden flex flex-col">
+          <div className="flex flex-col max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="px-4 pt-4 lg:px-6 lg:pt-6 pb-2 flex-shrink-0">
+              <DialogTitle>Crop Image</DialogTitle>
+            </DialogHeader>
+
+            {/* Cropper Container */}
+            <div className="relative mx-2 max-w-full h-[400px] bg-gray-100 dark:bg-gray-800  rounded-xl overflow-hidden">
+              {imageSrc && (
+               <Cropper
                 ref={cropperRef}
                 src={imageSrc}
                 onChange={onCropChange}
@@ -226,9 +232,12 @@ const Dropzone: React.FC<DropzoneProps> = ({
                 }}
                 className="cropper"
               />
-            )}
-          </div>
-          {!isFixed && (
+              )}
+            </div>
+
+            {/* controls */}
+            <div className="pb-2 px-2">
+              {!isFixed && (
             <div className="mt-4 flex items-center gap-3">
               <label className="text-gray-700 dark:text-gray-400">Aspect Ratio:</label>
               <select
@@ -277,8 +286,12 @@ const Dropzone: React.FC<DropzoneProps> = ({
               </button>
             </div>
           </div>
-        </div>
-      </Modal>
+            </div>
+
+            
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
