@@ -52,7 +52,7 @@ const EditBanner = ({ id }: { id: string }) => {
     formData.append('description', data.description || '');
     formData.append('start_date', new Date(new Date(data.validity.from).toISOString().substring(0, 10) + ' ' + data.startTime).toISOString());
     formData.append('end_date', new Date(new Date(data.validity.to).toISOString().substring(0, 10) + ' ' + data.endTime).toISOString());
-    formData.append('is_active', true.toString()); // New banners are inactive by default
+    formData.append('is_active', data.active ? '1' : '0'); // New banners are inactive by default
     formData.append('priority', data.priority.toString());
     formData.append('file', data.file as File);
     formData.append('media', JSON.stringify(data.media || []));
@@ -101,6 +101,7 @@ const EditBanner = ({ id }: { id: string }) => {
             name: currentBanner.data?.name || '',
             description: currentBanner.data?.description || '',
             media: currentBanner.data?.media || null,
+            active: currentBanner.data?.is_active == '1',
 
           }}
           onCancel={()=>{router.back()}}

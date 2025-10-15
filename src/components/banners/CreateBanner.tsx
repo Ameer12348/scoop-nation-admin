@@ -65,7 +65,7 @@ export default function CreateBanner() {
     bannerFormData.append('description', data.description || '');
     bannerFormData.append('start_date', new Date(new Date(data.validity.from).toISOString().substring(0, 10) + ' ' + data.startTime).toISOString());
     bannerFormData.append('end_date', new Date(new Date(data.validity.to).toISOString().substring(0, 10) + ' ' + data.endTime).toISOString());
-    bannerFormData.append('is_active', true.toString()); // New banners are inactive by default
+    bannerFormData.append('is_active', data.active ? '1' : '0'); // New banners are inactive by default
     bannerFormData.append('priority', data.priority.toString());
     bannerFormData.append('file', data.file as File);
     addBanner(bannerFormData);

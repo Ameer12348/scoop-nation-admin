@@ -34,6 +34,7 @@ interface Banner {
     branches: string[];
     name: string;
     description: string;
+    active: boolean;
     media?: Array<Media> | null;
 }
 
@@ -61,6 +62,7 @@ const schema = z.object({
     startTime: z.string().min(1, 'Start time is required'),
     endTime: z.string().min(1, 'End time is required'),
     priority: z.number().min(1, 'Priority must be at least 1'),
+    active: z.boolean(),
     // linkItem: z.string().optional(),
     // branches: z.array(z.string()).min(0),
     media: z.array(z.any()).optional(),
@@ -108,6 +110,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
             startTime: '00:00',
             endTime: '00:00',
             priority: 1,
+            active: true,
             // branches: [],
             // linkItem: '',
             name: '',
@@ -134,6 +137,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                 ...banner,
                 validity: banner.validity || { from: new Date(), to: new Date() },
                 priority: banner.priority || 1,
+                active: banner.active ?? true,
                 branches: banner.branches || [],
             } as BannerFormData);
         }
@@ -310,6 +314,18 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                         />
                         {errors.priority && <p className="text-sm text-destructive">{errors.priority.message}</p>}
                     </div>
+                </div>
+
+                {/* Active Status */}
+                <div className="flex items-center space-x-2">
+                    <Checkbox
+                        id="active"
+                        checked={watch('active')}
+                        onCheckedChange={(checked) => setValue('active', checked as boolean)}
+                    />
+                    <Label htmlFor="active" className="cursor-pointer">
+                        Active Banner
+                    </Label>
                 </div>
 
                 {/* Link with Item */}

@@ -70,12 +70,12 @@ export default function BannerTable({banners}:BannerTableProps) {
                     {/* <Switch label={item.is_active ? "Active" : "In-Active"} defaultChecked={item.is_active} onChange={(checked) => toggleActive(item.id)} /> */}
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.is_active
+                        item?.is_active == '1'
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {item.is_active ? "Active" : "In-Active"}
+                      {item?.is_active == '1' ? "Active" : "In-Active"}
                     </span>
                     
                     </div>
@@ -123,12 +123,12 @@ export default function BannerTable({banners}:BannerTableProps) {
                   {/* <Switch label={item.active ? "Active" : "In-Active"} defaultChecked={item.active} onChange={(  checked ) => toggleActive(item.id)} /> */}
                    <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.is_active
+                        item?.is_active == '1' 
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {item.is_active ? "Active" : "In-Active"}
+                      {item?.is_active == '1' ? "Active" : "In-Active"}
                     </span>
                 </div>
               </div>
