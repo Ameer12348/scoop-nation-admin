@@ -66,6 +66,10 @@ interface BannerState {
     error: null | string,
     bannerId: string | null,
   };
+  deleteBanner: {
+    loading: boolean,
+    error: null | string,
+  };
   loading: boolean;
   error: string | null;
 }
@@ -87,6 +91,10 @@ const initialState: BannerState = {
     loading: false,
     error: null,
     bannerId: null,
+  },
+  deleteBanner: {
+    loading: false,
+    error: null,
   },
   loading: false,
   error: null,
@@ -207,6 +215,37 @@ export const updateBanner = createAsyncThunk(
   }
 );
 
+// Create async thunk for deleting a banner
+export const deleteBanner = createAsyncThunk(
+  'banners/deleteBanner',
+  async (id: number | string, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.delete('/api/banners/delete', {
+        data: { id }
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to delete banner');
+      }
+
+      // Show success toast
+      toast.success(response.data.message || 'Banner deleted successfully');
+
+      // Refetch banners after successful deletion
+      dispatch(fetchBanners({}));
+
+      return response.data;
+    } catch (error) {
+      // Show error toast
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      toast.error(errorMessage);
+
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+
 // Create the banner slice
 const bannerSlice = createSlice({
   name: 'banners',
@@ -283,6 +322,20 @@ const bannerSlice = createSlice({
       .addCase(createBanner.rejected, (state, action) => {
         state.createBanner.loading = false;
         state.createBanner.error = action.payload as string;
+      })
+
+      // Handle deleteBanner
+      .addCase(deleteBanner.pending, (state) => {
+        state.deleteBanner.loading = true;
+        state.deleteBanner.error = null;
+      })
+      .addCase(deleteBanner.fulfilled, (state) => {
+        state.deleteBanner.loading = false;
+        state.deleteBanner.error = null;
+      })
+      .addCase(deleteBanner.rejected, (state, action) => {
+        state.deleteBanner.loading = false;
+        state.deleteBanner.error = action.payload as string;
       });
   },
 });
@@ -297,3 +350,4 @@ export const selectCurrentBanner = (state: { banners: BannerState }) => state.ba
 export const selectBannersLoading = (state: { banners: BannerState }) => state.banners.loading;
 export const selectBannersError = (state: { banners: BannerState }) => state.banners.error;
 export const selectCreateBanner = (state: { banners: BannerState }) => state.banners.createBanner;
+export const selectDeleteBanner = (state: { banners: BannerState }) => state.banners.deleteBanner;

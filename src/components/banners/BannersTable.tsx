@@ -5,9 +5,22 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FaRegEdit } from "react-icons/fa";
 import Switch from "../form/switch/Switch";
-import { Banner } from "@/store/slices/bannerSlice";
+import { Banner, deleteBanner } from "@/store/slices/bannerSlice";
 import Link from "next/link";
 import { BASE_URL } from "@/consts";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { Loader, X } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 
 
@@ -17,8 +30,13 @@ type BannerTableProps = {
 
 
 export default function BannerTable({banners}:BannerTableProps) {
+  const dispatch = useAppDispatch();
+  const { deleteBanner: { loading: deleteBannerLoading } } = useAppSelector(state => state.banners);
 
-
+  // Handle deleting a banner
+  const handleDelete = (id: string) => {
+    dispatch(deleteBanner(id));
+  };
 
   return (
     <div className="w-full">
@@ -81,9 +99,35 @@ export default function BannerTable({banners}:BannerTableProps) {
                     </div>
                   </td>
                   <td className="px-3 py-2 border text-center">
-                    <Link href={'/banners/edit/'+item.id}  className="inline-block "  onClick={()=>{}}>
-                      <FaRegEdit className="text-lg text-gray-600" />
-                    </Link>
+                    <div className="flex items-center justify-center space-x-2">
+                      <Link href={'/banners/edit/'+item.id}  className="inline-block p-1 text-blue-600 hover:text-blue-800">
+                        <FaRegEdit className="text-lg" />
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            className="p-1 text-red-600 hover:text-red-800"
+                          >
+                            {
+                              deleteBannerLoading ? <Loader className="h-4 w-4 animate-spin" /> : <X size={16} />
+                            }
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure you want to delete {item.name}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the banner
+                              and remove the data from the server.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(item.id)}>Continue</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -106,9 +150,35 @@ export default function BannerTable({banners}:BannerTableProps) {
                   height={60}
                   className="rounded object-cover"
                 />
-                    <Link href={'/banners/edit/'+item.id}  className="inline-block "  onClick={()=>{}}>
-                      <FaRegEdit className="text-lg text-gray-600" />
-                </Link>
+                <div className="flex space-x-2">
+                  <Link href={'/banners/edit/'+item.id}  className="inline-block p-1 text-blue-600 hover:text-blue-800">
+                    <FaRegEdit className="text-lg" />
+                  </Link>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="p-1 text-red-600 hover:text-red-800"
+                      >
+                        {
+                          deleteBannerLoading ? <Loader className="h-4 w-4 animate-spin" /> : <X size={16} />
+                        }
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure you want to delete {item.name}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the banner
+                          and remove the data from the server.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(item.id)}>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
               <div className="mt-2 text-sm space-y-1">
                 <p>
