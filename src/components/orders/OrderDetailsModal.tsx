@@ -209,6 +209,15 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
         <span className="font-semibold text-sm">{item.product?.title ?? 'N/A'}</span>
         <Badge variant="secondary" className="text-xs">ID: {item.id ?? 'N/A'}</Badge>
       </div>
+      
+      {/* Variant Badge */}
+      {item.variant && (
+        <div className="mb-2">
+          <Badge variant="outline" className="text-xs">
+            {item.variant.name}: {item.variant.value}
+          </Badge>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div>
@@ -316,6 +325,7 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                   <tr className="bg-gray-100">
                     <th className="border p-2 text-left">Item ID</th>
                     <th className="border p-2 text-left">Item Details</th>
+                    <th className="border p-2 text-left">Variant</th>
                     <th className="border p-2 text-left">Delivered Qty</th>
                     <th className="border p-2 text-left">Ordered Qty</th>
                     <th className="border p-2 text-left">Original Price</th>
@@ -329,6 +339,15 @@ export default function OrderDetailsModal({ order, open, onOpenChange}: { order:
                     <tr key={item.id ?? idx}>
                       <td className="border p-2">{item.id ?? 'N/A'}</td>
                       <td className="border p-2 max-w-xs truncate">{item.product.title ?? 'N/A'}</td>
+                      <td className="border p-2">
+                        {item.variant ? (
+                          <Badge variant="outline" className="text-xs">
+                            {item.variant.name}: {item.variant.value}
+                          </Badge>
+                        ) : (
+                          'N/A'
+                        )}
+                      </td>
                       <td className="border p-2">0</td>
                       <td className="border p-2">{item.quantity ?? 0}</td>
                       <td className="border p-2">{( parseFloat(item.variant?.originalPrice || '0') ?? 0).toFixed(2)}</td>
