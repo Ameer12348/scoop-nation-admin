@@ -26,6 +26,7 @@ const EditBanner = ({ id }: { id: string }) => {
       // Invalidate the 'todos' query to refetch the updated list
       if (data.success) {
         toast.success(data?.message || 'Product Updated successfully')
+        fetchBannerById(id);
       }
       else {
         toast.error(data?.error || data?.message || 'Failed to update product')
@@ -44,7 +45,7 @@ const EditBanner = ({ id }: { id: string }) => {
     fetchBannerById(id);
   }, [id]);
 
-  const handleUpdate = (data: BannerFormData) => {
+  const handleUpdate = async (data: BannerFormData) => {
     const formData = new FormData();
     formData.append('id', id);
     formData.append('name', data.name || '');
@@ -55,7 +56,7 @@ const EditBanner = ({ id }: { id: string }) => {
     formData.append('priority', data.priority.toString());
     formData.append('file', data.file as File);
     formData.append('media', JSON.stringify(data.media || []));
-    updateBanner({ formData, productId: id });
+    updateBanner({ formData, productId: id })
   }
 
   return (

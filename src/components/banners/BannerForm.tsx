@@ -123,6 +123,8 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
     // const selectedBranches = watch('branches') || [];
     // const selectedItem = watch('linkItem') || '';
     const validity = watch('validity');
+    // Watch media field to trigger re-renders when it changes
+    const mediaWatch = watch('media');
 
     const [mediaFiles, setMediaFiles] = React.useState<File | null>(null);
 
@@ -422,7 +424,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                     )}
 
                     {
-                        form.getValues('media') && form.getValues('media')?.map((med, index) => {
+                        mediaWatch && mediaWatch?.map((med, index) => {
                             if (med?.mime_type?.startsWith('image/')) {
                                 return <div key={index} className='relative' >
                                     <Image
@@ -439,7 +441,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                                         className="absolute top-2 right-2"
                                         onClick={() => {
                                             const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
-                                            setFormValues({ media: newMedia })
+                                            form.setValue('media', newMedia, { shouldValidate: true, shouldDirty: true })
                                         }}
                                     >
                                         <X size={16} />
@@ -462,7 +464,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                                         className="absolute top-2 right-2"
                                         onClick={() => {
                                             const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
-                                            setFormValues({ media: newMedia })
+                                            form.setValue('media', newMedia, { shouldValidate: true, shouldDirty: true })
                                         }}
                                     >
                                         <X size={16} />

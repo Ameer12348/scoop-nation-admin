@@ -145,7 +145,8 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
         name: "variants"
     });
 
-   
+    // Watch media field to trigger re-renders when it changes
+    const mediaWatch = form.watch('media');
 
     const handleMediaUpload = (file: File) => {
         console.log('Uploaded file:', file);
@@ -648,7 +649,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             )}
 
                             {
-                                form.getValues('media') && form.getValues('media')?.map((med, index) => {
+                                mediaWatch && mediaWatch?.map((med, index) => {
                                    if (med?.mime_type?.startsWith('image/')) {
                                     return  <div key={index} className='relative' >
                                         <Image
@@ -665,7 +666,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                             className="absolute top-2 right-2"
                                             onClick={() => {    
                                               const newMedia = form.getValues('media')?.filter((medf) => medf.imageID  !== med.imageID ); 
-                                                form.reset({media:newMedia})
+                                                form.setValue('media', newMedia, { shouldValidate: true, shouldDirty: true })
                                             }}
                                         >
                                             <X size={16} />
@@ -688,7 +689,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                             className="absolute top-2 right-2"
                                             onClick={() => {    
                                                 const newMedia = form.getValues('media')?.filter((medf) => medf.imageID  !== med.imageID ); 
-                                                form.reset({media:newMedia})
+                                                form.setValue('media', newMedia, { shouldValidate: true, shouldDirty: true })
                                             }}
                                         >
                                             <X size={16} />
