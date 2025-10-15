@@ -378,10 +378,11 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                             'image/png': [],
                             'image/jpeg': [],
                             'image/webp': [],
-                            'video/mp4': [],
                         }}
                         fixedRatio={1440/500}
                         onDone={handleMediaUpload}
+                        showDescription={false}
+                        title='Drag & Drop Banner Image'
                     />
                     {form.formState.errors.file && (
                         <p className="text-sm text-red-600 mt-1">{form.formState.errors.file.message}</p>
