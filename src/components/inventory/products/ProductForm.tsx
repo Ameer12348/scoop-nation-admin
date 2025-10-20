@@ -72,6 +72,7 @@ const productSchema = z.object({
     price: z.string().min(1, 'Price is required'),
     categoryId: z.string().min(1, 'Category is required'),
     manufacturer: z.string().optional(),
+    priority:z.string().optional(),
     slug: z.string().optional(),
     inStock: z.string().min(1, 'Stock is required'),
     rating: z.string().optional(),
@@ -115,6 +116,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
             slug: defaultValues?.slug || '',
             description: defaultValues?.description || '',
             manufacturer: defaultValues?.manufacturer || '',
+            priority: defaultValues?.priority || '0',
             price: defaultValues?.price || '',
             inStock: defaultValues?.inStock || '',
             categoryId: defaultValues?.categoryId || '',
@@ -191,6 +193,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                 description: productDetails.description || '',
                 manufacturer: productDetails.manufacturer || '',
                 price: productDetails.price || '',
+                priority: productDetails.priority as string || '0',
                 inStock: productDetails.inStock || '',
                 categoryId: productDetails.categoryId || '',
                 rating: productDetails.rating || '0',
@@ -295,7 +298,20 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             <FormItem>
                                 <FormLabel>Manufacturer (Optional)</FormLabel>
                                 <FormControl>
-                                    <Input {...field} />
+                                    <Input type='number' {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="priority"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Priority (Optional)</FormLabel>
+                                <FormControl>
+                                    <Input type='text' {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -33,6 +33,7 @@ export interface Product {
   title: string;
   mainImage: string;
   price: string;
+  priority: string | number;
   discountType: string | null;
   discountValue: string | null;
   originalPrice: string | null;
