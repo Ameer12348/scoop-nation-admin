@@ -99,8 +99,8 @@ export const loginAdmin = createAsyncThunk<
     const response = await api.post('/api/users/login-admin', credentials)
     // Store token in localStorage for persistence
     if (response.data.success && response.data.token) {
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
+      localStorage.setItem('admin_token', response.data.token)
+      localStorage.setItem('admin_user', JSON.stringify(response.data.user))
     }
     
     return response.data
@@ -124,10 +124,10 @@ export const updateProfile = createAsyncThunk<
     
     // Update user in localStorage if successful
     if (response.data.success && response.data.user) {
-      const user = localStorage.getItem('user')
+      const user = localStorage.getItem('admin_user')
       if (user) {
         const updatedUser = { ...JSON.parse(user), ...response.data.user }
-        localStorage.setItem('user', JSON.stringify(updatedUser))
+        localStorage.setItem('admin_user', JSON.stringify(updatedUser))
       }
     }
     
@@ -191,16 +191,16 @@ const authSlice = createSlice({
       state.user = null
       state.token = null
       // Clear localStorage
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+      localStorage.removeItem('admin_token')
+      localStorage.removeItem('admin_user')
     },
     clearError(state) {
       state.error = null
     },
     // set auth if exist in localStorage
     setAuthFromStorage(state) {
-      const token = localStorage.getItem('token')
-      const user = localStorage.getItem('user')
+      const token = localStorage.getItem('admin_token')
+      const user = localStorage.getItem('admin_user')
       if (token && user) {
         state.isLoggedIn = true
         state.token = token

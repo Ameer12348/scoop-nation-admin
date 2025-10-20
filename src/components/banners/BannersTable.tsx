@@ -100,7 +100,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                   </td>
                   <td className="px-3 py-2 border text-center">
                     <div className="flex items-center justify-center space-x-2">
-                      <Link href={'/banners/edit/'+item.id}  className="inline-block p-1 text-blue-600 hover:text-blue-800">
+                      <Link href={`/banners/edit?bannerId=${item.id}`}  className="inline-block p-1 text-blue-600 hover:text-blue-800">
                         <FaRegEdit className="text-lg" />
                       </Link>
                       <AlertDialog>
@@ -151,7 +151,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                   className="rounded object-cover"
                 />
                 <div className="flex space-x-2">
-                  <Link href={'/banners/edit/'+item.id}  className="inline-block p-1 text-blue-600 hover:text-blue-800">
+                  <Link href={`/banners/edit?bannerId=${item.id}`}  className="inline-block p-1 text-blue-600 hover:text-blue-800">
                     <FaRegEdit className="text-lg" />
                   </Link>
                   <AlertDialog>

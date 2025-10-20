@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // basePath: '/admin',
+  // assetPrefix: '/admin/',
+  // output: 'export', // Enables static export
+  // trailingSlash:true
 };
 
 export default nextConfig;

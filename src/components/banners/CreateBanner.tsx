@@ -47,7 +47,7 @@ export default function CreateBanner() {
       // Invalidate the 'todos' query to refetch the updated list
       if (data.success) {
         toast.success(data?.message || 'Banner Campaign Added successfully')
-        router.push(`/banners/edit/${data.data}`)
+        router.push(`/banners/edit?bannerId=${data.data}`)
       }
       else {
         toast.error(data?.error || data?.message || 'Failed to add Banner Campaign')
