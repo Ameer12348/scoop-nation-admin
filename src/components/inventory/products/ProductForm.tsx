@@ -71,8 +71,8 @@ const productSchema = z.object({
     description: z.string().min(1, 'Description is required'),
     price: z.string().min(1, 'Price is required'),
     categoryId: z.string().min(1, 'Category is required'),
-    manufacturer: z.string().min(1, 'Manufacturer is required'),
-    slug: z.string().min(1, 'Slug is required').optional(),
+    manufacturer: z.string().optional(),
+    slug: z.string().optional(),
     inStock: z.string().min(1, 'Stock is required'),
     rating: z.string().optional(),
     discountType: z.string().nullable(),
@@ -293,7 +293,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                         name="manufacturer"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Manufacturer</FormLabel>
+                                <FormLabel>Manufacturer (Optional)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
