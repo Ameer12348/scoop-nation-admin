@@ -253,7 +253,6 @@ export const SettingForm: React.FC = () => {
             'image/webp': [],
             'image/svg+xml': [],
           }}
-          fixedRatio={1}
           onDone={(file) => {
             setValue('file', file);
             setValue('logo', '');
