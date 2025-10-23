@@ -5,6 +5,7 @@ import type { RootState, AppDispatch } from './index'
 import { setShowAuthDialog, setAuthTab, setIsLoggedIn, logout, clearError, loginAdmin, registerUser, setAuthFromStorage } from './slices/authSlice'
 import { fetchBanners, fetchBannerById, updateBanner, createBanner, clearBannerError, selectBanners, selectCurrentBanner, selectBannersLoading, selectBannersError, selectCreateBanner } from './slices/bannerSlice'
 import { fetchCustomers, clearCustomerError, selectCustomers, selectCustomersPagination, selectCustomersLoading, selectCustomersError, selectCustomersFilters, CustomerQueryParams, fetchCustomerDetails, selectCustomerDetails, selectCustomerDetailsLoading, selectCustomerDetailsError } from './slices/customerSlice'
+import { fetchEmailTemplates, fetchEmailTemplateById, createEmailTemplate, updateEmailTemplate, deleteEmailTemplate, clearEmailTemplateError, selectEmailTemplates, selectCurrentEmailTemplate, selectEmailTemplatesLoading, selectEmailTemplatesError, selectCreateEmailTemplate, selectDeleteEmailTemplate } from './slices/emailTemplateSlice'
 
 export const useAppDispatch: () => AppDispatch = useDispatch
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
@@ -97,4 +98,31 @@ export const useAuth = () =>{
         login: (credentials: { email: string, password: string }) => dispatch(loginAdmin(credentials)),
         register: (userData: { email: string, password: string, fullname: string, phone: string }) => dispatch(registerUser(userData))
     }
+}
+
+export const useEmailTemplates = () => {
+  const emailTemplates = useAppSelector(selectEmailTemplates)
+  const currentEmailTemplate = useAppSelector(selectCurrentEmailTemplate)
+  const createEmailTemplateState = useAppSelector(selectCreateEmailTemplate)
+  const deleteEmailTemplateState = useAppSelector(selectDeleteEmailTemplate)
+  const loading = useAppSelector(selectEmailTemplatesLoading)
+  const error = useAppSelector(selectEmailTemplatesError)
+  const dispatch = useAppDispatch()
+  
+  return {
+    emailTemplates,
+    currentEmailTemplate,
+    createEmailTemplate: createEmailTemplateState,
+    deleteEmailTemplate: deleteEmailTemplateState,
+    loading,
+    error,
+    fetchEmailTemplates: (params: { page?: number, limit?: number, search?: string }) => dispatch(fetchEmailTemplates(params)),
+    fetchEmailTemplateById: (id: string) => dispatch(fetchEmailTemplateById(id)),
+    createEmailTemplateAction: (templateData: { name: string, slug: string, subject: string, body_html: string, variables?: string, is_active: boolean }) => 
+      dispatch(createEmailTemplate(templateData)),
+    updateEmailTemplateAction: (templateData: { id: number, name?: string, slug?: string, subject?: string, body_html?: string, variables?: string, is_active?: boolean }) => 
+      dispatch(updateEmailTemplate(templateData)),
+    deleteEmailTemplateAction: (id: number | string) => dispatch(deleteEmailTemplate(id)),
+    clearError: () => dispatch(clearEmailTemplateError()),
+  }
 }
