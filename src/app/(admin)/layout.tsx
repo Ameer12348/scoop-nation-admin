@@ -1,6 +1,7 @@
 "use client";
 
 import ProtectedRoutes from "@/components/auth/ProtectedRoutes";
+import OrderNotify from "@/components/orders/OrderNotify";
 import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
@@ -36,6 +37,7 @@ export default function AdminLayout({
           {/* Page Content */}
           <div className="p-2.5 mx-auto max-w-(--breakpoint-2xl) md:p-4">{children}</div>
         </div>
+        <OrderNotify/>
       </ProtectedRoutes>
     </div>
   );
