@@ -163,7 +163,7 @@ export default function RecentOrders() {
                 <TableCell className="py-3">
                   <div className="flex items-center gap-3">
                     <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
-                      <Image
+                      <img
                         width={50}
                         height={50}
                         src={product.image}

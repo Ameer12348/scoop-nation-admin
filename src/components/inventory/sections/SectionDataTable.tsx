@@ -204,7 +204,7 @@ export default function Sections() {
                                     <tr key={sec.id} className="border-b hover:bg-gray-50 transition">
                                         <td className="px-3 py-2 border">
                                             {sec.image ? (
-                                                <Image
+                                                <img
                                                     width={80}
                                                     height={80}
                                                     src={sec.image.url || ''}
@@ -237,7 +237,7 @@ export default function Sections() {
                         {sections.map((sec) => (
                             <div key={sec.id} className="border rounded-lg p-3 shadow-sm bg-white">
                                 <div className="flex items-start justify-between">
-                                    <Image
+                                    <img
                                         src={sec.image?.url || ''}
                                         alt="app banner"
                                         width={100}

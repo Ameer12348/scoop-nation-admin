@@ -147,7 +147,7 @@ const OrderDetailCard = ({ order }: { order: RecentOrder }) => {
                     <td colSpan={4} >
                         <li key={item.product.id} className={`overflow-hidden transition duration-300 ${showOrderItems ? 'h-auto flex py-6 px-2' : 'h-0'}`}>
                             <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                                <Image
+                                <img
                                     src={`${BASE_URL}/` + item.product.mainImage}
                                     alt={item.product.title}
                                     className="h-full w-full object-cover object-center"
@@ -190,7 +190,7 @@ const FavouriteCard = ({ fav }: { fav: any }) => {
     return (
         <div className="bg-white p-3 rounded-lg border flex gap-3 items-start">
             <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                <Image
+                <img
                     src={imageSrc}
                     alt={fav?.title || 'product'}
                     className="h-full w-full object-cover object-center"

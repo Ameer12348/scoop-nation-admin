@@ -411,7 +411,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                     {mediaFiles && (
                         <div className='relative'>
                             {mediaFiles.type.startsWith('image/') ? (
-                                <Image
+                                <img
                                     src={URL.createObjectURL(mediaFiles)}
                                     alt={`Media files`}
                                     width={250}
@@ -443,7 +443,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                         mediaWatch && mediaWatch?.map((med, index) => {
                             if (med?.mime_type?.startsWith('image/')) {
                                 return <div key={index} className='relative' >
-                                    <Image
+                                    <img
                                         src={`${BASE_URL}/` + med.image}
                                         alt={`Media ${index + 1}`}
                                         width={250}

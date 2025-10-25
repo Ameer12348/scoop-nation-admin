@@ -281,7 +281,7 @@ export default function ProductDataTable() {
                                                     <tr key={product.id} className="border-t">
                                                         <td className="px-4 py-2">
                                                             {product.mainImage && (
-                                                                <Image
+                                                                <img
                                                                     src={`${BASE_URL}/` + product.mainImage}
                                                                     alt={product.title}
                                                                     width={40}
@@ -348,7 +348,7 @@ export default function ProductDataTable() {
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex items-center space-x-3">
                                                         {product.mainImage && (
-                                                            <Image
+                                                            <img
                                                                 src={`${BASE_URL}/` + product.mainImage}
                                                                 alt={product.title}
                                                                 width={40}

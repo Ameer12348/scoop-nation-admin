@@ -253,7 +253,7 @@ function SectionForm({ mode, onSubmit, defaultValues }: SectionFormProps) {
                     {/* --- Image Upload --- */}
                     <FormItem>
                         <FormLabel>Image</FormLabel>
-                        {preview && <Image width={140} height={140} src={preview || ''} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
+                        {preview && <img width={140} height={140} src={preview || ''} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
                         <div className="flex space-x-4 mt-2">
                             <Button
                                 type="button"

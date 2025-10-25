@@ -636,7 +636,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                             {mediaFiles && (
                                 <div className='relative'>
                                     {mediaFiles.type.startsWith('image/') ? (
-                                        <Image
+                                        <img
                                             src={URL.createObjectURL(mediaFiles)}
                                             alt={`Media files`}
                                             width={250}
@@ -668,7 +668,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving}: Product
                                 mediaWatch && mediaWatch?.map((med, index) => {
                                    if (med?.mime_type?.startsWith('image/')) {
                                     return  <div key={index} className='relative' >
-                                        <Image
+                                        <img
                                             src={`${BASE_URL}/`+med.image}
                                             alt={`Media ${index + 1}`}
                                             width={250 }

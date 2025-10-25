@@ -61,7 +61,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                   className="border-b hover:bg-gray-50 transition"
                 >
                   {/* <td className="px-3 py-2 border">
-                    <Image
+                    <img
                       src={'/'}
                       alt="app banner"
                       width={90}
@@ -70,7 +70,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                     />
                   </td> */}
                   <td className="px-3 py-2 border">
-                      <Image
+                      <img
                         src={`${BASE_URL}/`+item.media[0].image}
                         alt="web banner"
                         width={90}
@@ -143,7 +143,7 @@ export default function BannerTable({banners}:BannerTableProps) {
               className="border rounded-lg p-3 shadow-sm bg-white"
             >
               <div className="flex items-center justify-between">
-                <Image
+                <img
                   src={`${BASE_URL}/`+item.media[0].image}
                   alt="webbanner"
                   width={100}

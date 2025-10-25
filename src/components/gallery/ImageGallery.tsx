@@ -145,7 +145,7 @@ function ImageForm({ mode, onSubmit, defaultValues }: ImageFormProps) {
                     <label htmlFor="file-upload" className="cursor-pointer">
                       <p>Drag and drop image here or click to select</p>
                     </label>
-                    {preview && <Image width={140} height={140} src={preview} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
+                    {preview && <img width={140} height={140} src={preview} alt="Preview" className="mt-2 max-h-32 mx-auto" />}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -177,7 +177,7 @@ interface ImageCardProps {
 function ImageCard({ image, onOpenEdit, onDelete ,className}: ImageCardProps) {
   return (
     <div className={`relative flex flex-col items-center border rounded-lg p-2 shadow-sm ${className}`}>
-      <Image width={140} height={140} src={image.url} alt={image.alt} className="w-full h-32 object-cover mb-2" />
+      <img width={140} height={140} src={image.url} alt={image.alt} className="w-full h-32 object-cover mb-2" />
       <p className="text-center font-medium">{image.name}</p>
       <div className="absolute top-2 right-2 flex gap-1 pt-1 pe-1">
         <button className='bg-transparent  text-sm border-none' onClick={() => onOpenEdit(image)}>

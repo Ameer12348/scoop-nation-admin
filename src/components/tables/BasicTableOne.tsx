@@ -160,7 +160,7 @@ export default function BasicTableOne() {
                   <TableCell className="px-5 py-4 sm:px-6 text-start">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 overflow-hidden rounded-full">
-                        <Image
+                        <img
                           width={40}
                           height={40}
                           src={order.user.image}
@@ -187,7 +187,7 @@ export default function BasicTableOne() {
                           key={index}
                           className="w-6 h-6 overflow-hidden border-2 border-white rounded-full dark:border-gray-900"
                         >
-                          <Image
+                          <img
                             width={24}
                             height={24}
                             src={teamImage}
