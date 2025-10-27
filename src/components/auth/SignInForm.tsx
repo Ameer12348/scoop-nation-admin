@@ -169,7 +169,7 @@ export default function SignInForm() {
                     <p className="text-sm text-error-500 mt-1">{errors.password.message}</p>
                   )}
                 </div>
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Checkbox checked={isChecked} onChange={setIsChecked} />
                     <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
@@ -182,7 +182,7 @@ export default function SignInForm() {
                   >
                     Forgot password?
                   </Link>
-                </div>
+                </div> */}
                 <div>
                   <button className={`inline-flex w-full items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3  bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300`} >
                     {
@@ -193,7 +193,7 @@ export default function SignInForm() {
               </div>
             </form>
 
-            <div className="mt-5">
+            {/* <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
                 Don&apos;t have an account? {""}
                 <Link
@@ -203,7 +203,7 @@ export default function SignInForm() {
                   Sign Up
                 </Link>
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
