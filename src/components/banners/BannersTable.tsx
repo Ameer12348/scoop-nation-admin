@@ -9,7 +9,7 @@ import { Banner, deleteBanner } from "@/store/slices/bannerSlice";
 import Link from "next/link";
 import { BASE_URL } from "@/consts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { Loader, X } from "lucide-react";
+import { Loader, Trash2, X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -109,7 +109,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                             className="p-1 text-red-600 hover:text-red-800"
                           >
                             {
-                              deleteBannerLoading ? <Loader className="h-4 w-4 animate-spin" /> : <X size={16} />
+                              deleteBannerLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Trash2 size={16} />
                             }
                           </button>
                         </AlertDialogTrigger>
@@ -160,7 +160,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                         className="p-1 text-red-600 hover:text-red-800"
                       >
                         {
-                          deleteBannerLoading ? <Loader className="h-4 w-4 animate-spin" /> : <X size={16} />
+                          deleteBannerLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Trash2 size={16} />
                         }
                       </button>
                     </AlertDialogTrigger>

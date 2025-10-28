@@ -65,7 +65,7 @@ function UsersTable({ data }: { data: Customer[] }) {
             <th className="px-3 py-2 border whitespace-nowrap">FIRST ORDERED AT	</th>
             <th className="px-3 py-2 border whitespace-nowrap">LAST ORDERED AT	</th>
             <th className="px-3 py-2 border whitespace-nowrap">Total Favourites</th>
-            <th className="px-3 py-2 border whitespace-nowrap">BLACKLIST ACTION	</th>
+            {/* <th className="px-3 py-2 border whitespace-nowrap">BLACKLIST ACTION	</th> */}
             <th className="px-3 py-2 border whitespace-nowrap">ACTION</th>
           </tr>
         </thead>
@@ -113,14 +113,14 @@ function UsersTable({ data }: { data: Customer[] }) {
                 {row.total_favourites ?? 0}
               </td>
               {/* blacklist action */}
-              <td className="px-3 py-2 border text-center  whitespace-nowrap">
+              {/* <td className="px-3 py-2 border text-center  whitespace-nowrap">
                 <div className="flex space-x-1">
                   <Button variant="outline" size="sm" className="p-1 h-6">
                     <FaTimes className="h-3 w-3 text-red-500" />
                   </Button>
-                  {/* <Badge variant={row.blacklist ? "destructive" : "default"} className="text-xs">No</Badge> */}
+                  <Badge variant={row.blacklist ? "destructive" : "default"} className="text-xs">No</Badge>
                 </div>
-              </td>
+              </td> */}
               {/* actions */}
               <td className="px-3 py-2 border text-center">
                 <Button

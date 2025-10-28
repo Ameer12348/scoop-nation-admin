@@ -9,7 +9,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 
-import { Loader, X, } from 'lucide-react';
+import { Loader,  Trash2, } from 'lucide-react';
 import TableContainerCard from '@/components/common/TableContainerCard';
 import SearchAndPaginationWrapper from '@/components/common/SearchAndPaginationWrapper';
 import { FaRegEdit } from 'react-icons/fa';
@@ -218,16 +218,8 @@ export default function ProductDataTable() {
     return (
         <div className="">
             {/* Add Product Dialog */}
-            <Dialog open={showAddFormDialog} onOpenChange={() => { setShowAddFormDialog(false) }}>
-                <DialogContent className='p-0  min-w-[98vw] sm:min-w-[90vw] md:min-w-[700px] lg:min-w-[900px]'>
-                    <div className="max-h-[calc(90vh)] p-5 overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>Add Product</DialogTitle>
-                        </DialogHeader>
-                        <ProductForm saving={addProductLoading} mode="add" onSubmit={handleAdd} />
-                    </div>
-                </DialogContent>
-            </Dialog>
+         
+            <ProductForm showDialog={showAddFormDialog} setShowDialog={()=>{setShowAddFormDialog(false)}} saving={addProductLoading} mode="add" onSubmit={handleAdd} />
 
             {/* Main Table */}
             <TableContainerCard
@@ -313,7 +305,7 @@ export default function ProductDataTable() {
                                                                             className="p-1 text-red-600 hover:text-red-800"
                                                                         >
                                                                             {
-                                                                                deleteProductLoading ? <Loader className={`h-4 w-4 animate-spin `} /> : <X size={16} />
+                                                                                deleteProductLoading ? <Loader className={`h-4 w-4 animate-spin `} /> : <Trash2 size={16} />
                                                                             }
                                                                         </button>
                                                                     </AlertDialogTrigger>
@@ -374,7 +366,7 @@ export default function ProductDataTable() {
                                                                     className="p-1 text-red-600 hover:text-red-800"
                                                                 >
                                                                     {
-                                                                        deleteProductLoading ? <Loader className={`h-4 w-4 animate-spin `} /> : <X size={16} />
+                                                                        deleteProductLoading ? <Loader className={`h-4 w-4 animate-spin `} /> : <Trash2 size={16} />
                                                                     }
 
 
@@ -435,19 +427,11 @@ export default function ProductDataTable() {
                 </SearchAndPaginationWrapper>
             </TableContainerCard>
 
-            {/* Edit Product Dialog */}
-            <Dialog open={!!editProduct} onOpenChange={() => setEditProduct(null)}>
-                <DialogContent className='p-0  min-w-[98vw] sm:min-w-[90vw] md:min-w-[700px] lg:min-w-[900px] xl:min-w-[1100px]'>
-                    <div className="max-h-[calc(90vh)] p-5 overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>Edit Product</DialogTitle>
-                        </DialogHeader>
-                        {editProduct && (
-                            <ProductForm mode="edit" onSubmit={handleEdit} saving={updateProductLoading} productId={editProduct.id} />
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
+           
+            {editProduct && (
+                <ProductForm showDialog={!!editProduct} setShowDialog={() => setEditProduct(null)} mode="edit" onSubmit={handleEdit} saving={updateProductLoading} productId={editProduct.id} />
+            )}
+                 
         </div>
     );
 }

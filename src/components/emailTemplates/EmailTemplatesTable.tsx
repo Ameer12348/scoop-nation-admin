@@ -25,9 +25,9 @@ export default function EmailTemplatesTable({ emailTemplates }: EmailTemplatesTa
   const dispatch = useAppDispatch()
   const { deleteEmailTemplate: { loading: deleteTemplateLoading } } = useAppSelector(state => state.emailTemplates)
 
-  const handleDelete = (id: string) => {
-    dispatch(deleteEmailTemplate(id))
-  }
+  // const handleDelete = (id: string) => {
+  //   dispatch(deleteEmailTemplate(id))
+  // }
 
   return (
     <div className="w-full">
@@ -65,7 +65,7 @@ export default function EmailTemplatesTable({ emailTemplates }: EmailTemplatesTa
                     <Link href={`/email_templates/edit?id=${template.id}`} className="inline-block p-1 text-blue-600 hover:text-blue-800">
                       <FaRegEdit className="text-lg" />
                     </Link>
-                    <AlertDialog>
+                    {/* <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button className="p-1 text-red-600 hover:text-red-800">
                           {deleteTemplateLoading ? <Loader className="h-4 w-4 animate-spin" /> : <X size={16} />}
@@ -83,7 +83,7 @@ export default function EmailTemplatesTable({ emailTemplates }: EmailTemplatesTa
                           <AlertDialogAction onClick={() => handleDelete(template.id)}>Continue</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
-                    </AlertDialog>
+                    </AlertDialog> */}
                   </div>
                 </td>
               </tr>
@@ -102,7 +102,7 @@ export default function EmailTemplatesTable({ emailTemplates }: EmailTemplatesTa
                 <Link href={`/email_templates/edit?id=${template.id}`} className="inline-block p-1 text-blue-600 hover:text-blue-800">
                   <FaRegEdit className="text-lg" />
                 </Link>
-                <AlertDialog>
+                {/* <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <button className="p-1 text-red-600 hover:text-red-800">
                       {deleteTemplateLoading ? <Loader className="h-4 w-4 animate-spin" /> : <X size={16} />}
@@ -120,7 +120,7 @@ export default function EmailTemplatesTable({ emailTemplates }: EmailTemplatesTa
                       <AlertDialogAction onClick={() => handleDelete(template.id)}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
-                </AlertDialog>
+                </AlertDialog> */}
               </div>
             </div>
             <div className="mt-2 text-sm space-y-1">
