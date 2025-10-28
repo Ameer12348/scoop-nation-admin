@@ -74,6 +74,7 @@ const productSchema = z.object({
     categoryId: z.string().min(1, 'Category is required'),
     manufacturer: z.string().optional(),
     priority:z.string().optional(),
+    is_available: z.boolean().optional(),
     // slug: z.string().optional(),
     inStock: z.string().min(1, 'Stock is required'),
     // rating: z.string().optional(),
@@ -125,6 +126,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
             price: defaultValues?.price || '',
             inStock: defaultValues?.inStock || '',
             categoryId: defaultValues?.categoryId || '',
+            is_available: defaultValues?.is_available || false,
             // rating: defaultValues?.rating || '0',
             // discountType: defaultValues?.discountType || null,
             // discountValue: defaultValues?.discountValue || null,
@@ -193,30 +195,31 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
     useEffect(()=>{  
         if (mode == 'edit' && productDetails){
             form.reset({
-                title: productDetails.title || '',
-                // slug: productDetails.slug || '',
-                description: productDetails.description || '',
-                manufacturer: productDetails.manufacturer || '',
-                price: productDetails.price || '',
-                priority: productDetails.priority as string || '0',
-                inStock: productDetails.inStock || '',
-                categoryId: productDetails.categoryId || '',
-                // rating: productDetails.rating || '0',
-                // discountType: productDetails.discountType || null,
-                // discountValue: productDetails.discountValue || null,
-                originalPrice: productDetails.originalPrice || null,
-                // discountStartDate: productDetails.discountStartDate || null,
-                // discountEndDate: productDetails.discountEndDate || null,
-                variants: productDetails.variants.length > 0 ? productDetails.variants.map(variant => ({
-                    name: variant.name || '',
-                    value: variant.value || '',
-                    price: variant.price || '',
-                    inStock: variant.inStock || '',
-                    discountType: variant.discountType || null,
-                    discountValue: variant.discountValue || null,
-                    originalPrice: variant.originalPrice || null,
-                    discountStartDate: variant.discountStartDate || null,
-                    discountEndDate: variant.discountEndDate || null,
+                title: productDetails?.title || '',
+                // slug: productDetails?.slug || '',
+                description: productDetails?.description || '',
+                manufacturer: productDetails?.manufacturer || '',
+                price: productDetails?.price || '',
+                priority: productDetails?.priority as string || '0',
+                inStock: productDetails?.inStock || '',
+                categoryId: productDetails?.categoryId || '',
+                // rating: productDetails?.rating || '0',
+                // discountType: productDetails?.discountType || null,
+                // discountValue: productDetails?.discountValue || null,
+                originalPrice: productDetails?.originalPrice || null,
+                is_available: productDetails?.is_available || false,
+                // discountStartDate: productDetails?.discountStartDate || null,
+                // discountEndDate: productDetails?.discountEndDate || null,
+                variants: productDetails?.variants.length > 0 ? productDetails?.variants.map(variant => ({
+                    name: variant?.name || '',
+                    value: variant?.value || '',
+                    price: variant?.price || '',
+                    inStock: variant?.inStock || '',
+                    discountType: variant?.discountType || null,
+                    discountValue: variant?.discountValue || null,
+                    originalPrice: variant?.originalPrice || null,
+                    discountStartDate: variant?.discountStartDate || null,
+                    discountEndDate: variant?.discountEndDate || null,
                 })) : [{
                     name: 'size',
                     value: '',
@@ -228,7 +231,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                     discountStartDate: null,
                     discountEndDate: null,
                 }],
-                media: productDetails.media || []
+                media: productDetails?.media || []
             }
             );
         }
@@ -362,10 +365,11 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                 </FormItem>
                             )}
                         /> */}
+
                     </div>
 
                     {/* Main Product Details */}
-                    <div className="space-y-4  grid grid-cols-2 gap-2">
+                    <div className="space-y-4   grid grid-cols-2 sm:grid-cols-3  gap-2">
                         <h3 className="text-lg font-semibold col-span-full">Pricing and Stock</h3>
                         <FormField
                             control={form.control}
@@ -465,6 +469,27 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                 </FormItem>
                             )}
                         /> */}
+                        <FormField
+                            control={form.control}
+                            name="is_available"
+                            render={({ field }) => (
+                                <FormItem className="col-span-full">
+                                    <FormLabel>Available</FormLabel>
+                                    <FormControl>
+                                        <label className="inline-flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!field.value}
+                                                onChange={(e) => field.onChange(e.target.checked)}
+                                                className="h-4 w-4 rounded"
+                                            />
+                                            <span className="text-sm">Is available</span>
+                                        </label>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
                     {/* Variants Section */}
@@ -476,7 +501,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                             </Button>
                         </div>
                         {fields.map((field, index) => (
-                            <div key={field.id} className="p-4 border rounded-lg space-y-4  grid grid-cols-2 gap-2 relative">
+                            <div key={field.id} className="p-4 border rounded-lg space-y-4  grid grid-cols-2 sm:grid-cols-3  gap-2 relative">
                                 {fields.length > 1 && (
                                     <Button
                                         type="button"

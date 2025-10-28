@@ -46,6 +46,7 @@ export interface Product {
   categoryId: string;
   variants: Variant[];
   media: Media[];
+  is_available: boolean ;
 }
 
 // Payload for creating a product
