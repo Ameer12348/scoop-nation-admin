@@ -25,7 +25,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import { Pencil, X } from 'lucide-react';
+import { Pencil, Trash2, } from 'lucide-react';
 
 // Import your existing ImageGallery component
 import ImageGallery, { ImageType } from '@/components/gallery/ImageGallery';
@@ -34,6 +34,20 @@ import SearchAndPaginationWrapper from '@/components/common/SearchAndPaginationW
 import { FaRegEdit } from 'react-icons/fa';
 import Image from 'next/image';
 import SectionForm, { SectionFormData } from './SectionForm';
+import api from '@/lib/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { BASE_URL } from '@/consts';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ✅ FIX: make it mutable string[]
 const daysOfWeek: string[] = [
@@ -49,143 +63,166 @@ const daysOfWeek: string[] = [
 export type Section = {
     id: string;
     name: string;
-    description: string;
-    priority: number;
-    availableFrom: string;
-    availableTo: string;
-    appOnly: boolean;
-    days: string[];
-    image?: ImageType | null;
-    products?: ImageType[];
+    mainImage: string;
+    branch_id?: number;
 };
 
 export default function Sections() {
-    const [sections, setSections] = useState<Section[]>([]);
+    const queryClient = useQueryClient();
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [editSection, setEditSection] = useState<Section | null>(null);
     const [showAddFormDialog, setShowAddFormDialog] = useState(false);
-    const itemsPerPage = 10;
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [sectionToDelete, setSectionToDelete] = useState<Section | null>(null);
+    const [itemsPerPage, setitemsPerPage] = useState(5)
+    // Fetch categories
+    const { data: categoriesData, isLoading, refetch: refetchCategories } = useQuery({
+        queryKey: ['categories', page, itemsPerPage, search],
+        queryFn: async () => {
+            const res = await api.get('/api/admin/categories', {
+                params: {
+                    page,
+                    limit: itemsPerPage,
+                    search: search || undefined,
+                },
+            });
+            return res.data;
+        },
+    });
 
-    // Demo data
-    useEffect(() => {
-        const demoSections: Section[] = [
-            {
-                id: '1',
-                name: 'Sandwich',
-                description: '',
-                priority: 9,
-                availableFrom: '00:00',
-                availableTo: '23:59',
-                appOnly: false,
-                days: [...daysOfWeek], // ✅ FIX here
-                image: { id: '1', url: '', name: 'Sandwich', alt: 'Sandwich' },
-                products: [],
-            },
-            {
-                id: '2',
-                name: 'Combo',
-                description: '',
-                priority: 8,
-                availableFrom: '00:00',
-                availableTo: '23:59',
-                appOnly: false,
-                days: [...daysOfWeek],
-                image: { id: '2', url: '', name: 'Combo', alt: 'Combo' },
-                products: [],
-            },
-        ];
-        setSections(demoSections);
-    }, []);
+    // Create category mutation
+    const { mutate: createCategory, isPending: isCreating } = useMutation({
+        mutationFn: async (formData: FormData) => {
+            const res = await api.post('/api/admin/categories/create', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            if (data.success) {
+                toast.success(data?.message || 'Category created successfully');
+                // queryClient.invalidateQueries({ queryKey: ['categories'] });
+                refetchCategories();
+                setShowAddFormDialog(false);
+            } else {
+                toast.error(data?.error || data?.message || 'Failed to create category');
+            }
+        },
+        onError: (error: any) => {
+            console.error('Mutation failed:', error);
+            toast.error(error?.message || 'Failed to create category');
+        },
+    });
 
-    const filteredSections = sections.filter((sec) =>
-        sec.name.toLowerCase().includes(search.toLowerCase())
-    );
+    // Update category mutation
+    const { mutate: updateCategory, isPending: isUpdating } = useMutation({
+        mutationFn: async (formData: FormData) => {
+            const res = await api.post('/api/admin/categories/update', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            if (data.success) {
+                toast.success(data?.message || 'Category updated successfully');
+                // queryClient.invalidateQueries({ queryKey: ['categories'] });
+                refetchCategories();
+                setEditSection(null);
+            } else {
+                toast.error(data?.error || data?.message || 'Failed to update category');
+            }
+        },
+        onError: (error: any) => {
+            console.error('Mutation failed:', error);
+            toast.error(error?.message || 'Failed to update category');
+        },
+    });
 
-    const totalPages = Math.ceil(filteredSections.length / itemsPerPage);
-    const displayedSections = filteredSections.slice(
-        (page - 1) * itemsPerPage,
-        page * itemsPerPage
-    );
+    // Delete category mutation
+    const { mutate: deleteCategory, isPending: isDeleting } = useMutation({
+        mutationFn: async (id: string) => {
+            const res = await api.post('/api/admin/categories/delete', { id });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            if (data.success) {
+                toast.success(data?.message || 'Category deleted successfully');
+                // queryClient.invalidateQueries({ queryKey: ['categories'] });
+                refetchCategories();
+                setDeleteDialogOpen(false);
+                setSectionToDelete(null);
+            } else {
+                toast.error(data?.error || data?.message || 'Failed to delete category');
+            }
+        },
+        onError: (error: any) => {
+            console.error('Mutation failed:', error);
+            toast.error(error?.message || 'Failed to delete category');
+        },
+    });
 
-    const handleAdd = (data: SectionFormData, selectedImage: ImageType | null) => {
-        let image: ImageType | null = null;
+    const handleAdd = (data: SectionFormData) => {
+        const formData = new FormData();
+        formData.append('name', data.name);
         if (data.file) {
-            const url = URL.createObjectURL(data.file);
-            image = {
-                id: Date.now().toString(),
-                url,
-                name: data.name,
-                alt: data.description || '',
-            };
-        } else if (selectedImage) {
-            image = selectedImage;
+            formData.append('file', data.file);
         }
-        const newSection: Section = {
-            id: Date.now().toString(),
-            ...data,
-            image,
-            products: [],
-        };
-        setSections([newSection, ...sections]);
+        createCategory(formData);
     };
 
-    const handleEdit = (data: SectionFormData, selectedImage: ImageType | null) => {
+    const handleEdit = (data: SectionFormData) => {
         if (!editSection) return;
-        let image: ImageType | null = editSection.image ?? null;
+        const formData = new FormData();
+        formData.append('id', editSection.id);
+        formData.append('name', data.name);
         if (data.file) {
-            const url = URL.createObjectURL(data.file);
-            image = {
-                id: Date.now().toString(),
-                url,
-                name: data.name,
-                alt: data.description || '',
-            };
-        } else if (data.imageId && selectedImage) {
-            image = selectedImage;
+            formData.append('file', data.file);
         }
-        const updatedSection: Section = {
-            ...editSection,
-            ...data,
-            image,
-        };
-        setSections(
-            sections.map((sec) => (sec.id === editSection.id ? updatedSection : sec))
-        );
-        setEditSection(null);
+        updateCategory(formData);
     };
 
-    const handleDelete = (id: string) => {
-        setSections(sections.filter((sec) => sec.id !== id));
+    const handleDelete = (section: Section) => {
+        setSectionToDelete(section);
+        setDeleteDialogOpen(true);
     };
+
+    const confirmDelete = () => {
+        if (sectionToDelete) {
+            deleteCategory(sectionToDelete.id);
+        }
+    };
+
+    const sections = categoriesData?.data || [];
+    const totalItems = categoriesData?.pagination?.total || 0;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
     return (
         <div className=" ">
-            <Dialog open={showAddFormDialog}   onOpenChange={() => { setShowAddFormDialog(false) }}>
-                <DialogContent className='p-0 min-w-[98vw] sm:min-w-[90vw] md:min-w-[700px] lg:min-w-[900px] ' >
-                 <div className="max-h-[calc(90vh)] p-5 overflow-y-auto  ">
-                 <DialogHeader>
-                        <DialogTitle>Add Section</DialogTitle>
-                    </DialogHeader>
-                    <SectionForm mode="add" onSubmit={handleAdd} />
-                 </div>
-                </DialogContent>
-            </Dialog>
+
+            <SectionForm showDialog={showAddFormDialog} setShowDialog={() => { setShowAddFormDialog(false) }} mode="add" onSubmit={handleAdd} loading={isCreating} />
+
 
             <TableContainerCard
                 title="Sections"
                 addButton
                 addButtonText="Add Section"
                 addButtonAction={() => { setShowAddFormDialog(true) }}
+                 refreshButtonAction={()=>{refetchCategories()}}
+                 hasRefreshButton={true}
             >
                 <SearchAndPaginationWrapper
                     searchValue={search}
-                    onSearchChange={(e) => setSearch(e)}
+                    onSearchChange={(e) => {setSearch(e) ;setPage(1)}}
                     currentPage={page}
-                    totalItems={sections.length}
+                    totalItems={totalItems}
                     itemsPerPage={itemsPerPage}
                     onPageChange={setPage}
-                    onItemsPerPageChange={() => { }}
+                    onItemsPerPageChange={(perPage) => { setitemsPerPage(perPage) ;setPage(1)}}
                 >
                     {/* Desktop table */}
                     <div className="overflow-x-auto hidden md:block">
@@ -194,92 +231,112 @@ export default function Sections() {
                                 <tr>
                                     <th className="px-3 py-2 border">IMAGE</th>
                                     <th className="px-3 py-2 border">NAME</th>
-                                    <th className="px-3 py-2 border">DESCRIPTION</th>
-                                    <th className="px-3 py-2 border">PRIORITY</th>
                                     <th className="px-3 py-2 border">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {displayedSections.map((sec) => (
-                                    <tr key={sec.id} className="border-b hover:bg-gray-50 transition">
-                                        <td className="px-3 py-2 border">
-                                            {sec.image ? (
-                                                <img
-                                                    width={80}
-                                                    height={80}
-                                                    src={sec.image.url || ''}
-                                                    alt={sec.name}
-                                                    className="w-16 h-16 object-cover rounded"
-                                                />
-                                            ) : (
-                                                <span className="text-gray-400">—</span>
-                                            )}
-                                        </td>
-                                        <td className="px-3 py-2 border text-center">{sec.name}</td>
-                                        <td className="px-3 py-2 border">{sec.description}</td>
-                                        <td className="px-3 py-2 border text-center">{sec.priority}</td>
-                                        <td className="px-3 py-2 border text-center">
-                                            <Button variant="ghost" size="icon" onClick={() => setEditSection(sec)}>
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(sec.id)}>
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </td>
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={3} className="px-3 py-4 text-center">Loading...</td>
                                     </tr>
-                                ))}
+                                ) : sections.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={3} className="px-3 py-4 text-center">No categories found</td>
+                                    </tr>
+                                ) : (
+                                    sections.map((sec: Section) => (
+                                        <tr key={sec.id} className="border-b hover:bg-gray-50 transition">
+                                            <td className="px-3 py-2 border">
+                                                {sec.mainImage ? (
+                                                    <img
+                                                        width={80}
+                                                        height={80}
+                                                        src={`${BASE_URL}/${sec.mainImage}`}
+                                                        alt={sec.name}
+                                                        className="w-16 h-16 object-cover rounded"
+                                                    />
+                                                ) : (
+                                                    <span className="text-gray-400">—</span>
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-2 border text-center">{sec.name}</td>
+                                            <td className="px-3 py-2 border text-center">
+                                                <Button variant="ghost" size="icon" onClick={() => setEditSection(sec)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(sec)}>
+                                                    <Trash2 className="h-4 w-4 text-red-700" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
 
                     {/* Mobile grid */}
                     <div className="grid gap-4 mt-6 md:hidden">
-                        {sections.map((sec) => (
-                            <div key={sec.id} className="border rounded-lg p-3 shadow-sm bg-white">
-                                <div className="flex items-start justify-between">
-                                    <img
-                                        src={sec.image?.url || ''}
-                                        alt="app banner"
-                                        width={100}
-                                        height={60}
-                                        className="rounded object-cover"
-                                    />
-                                    <div className="flex gap-0.5 items-center">
-                                        <Button variant="ghost" size="icon" onClick={() => setEditSection(sec)}>
-                                            <FaRegEdit className="text-lg text-gray-600" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(sec.id)}>
-                                            <X className="text-lg text-gray-600" />
-                                        </Button>
+                        {isLoading ? (
+                            <div className="text-center py-4">Loading...</div>
+                        ) : sections.length === 0 ? (
+                            <div className="text-center py-4">No categories found</div>
+                        ) : (
+                            sections.map((sec: Section) => (
+                                <div key={sec.id} className="border rounded-lg p-3 shadow-sm bg-white">
+                                    <div className="flex items-start justify-between">
+                                        <img
+                                            src={`${BASE_URL}/${sec.mainImage}`}
+                                            alt={sec.name}
+                                            width={100}
+                                            height={60}
+                                            className="rounded object-cover"
+                                        />
+                                        <div className="flex gap-0.5 items-center">
+                                            <Button variant="ghost" size="icon" onClick={() => setEditSection(sec)}>
+                                                <FaRegEdit className="text-lg text-gray-600" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(sec)}>
+                                                <Trash2 className="text-lg text-red-700" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 text-sm space-y-1">
+                                        <p>
+                                            <span className="font-medium">Name:</span> {sec.name}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="mt-2 text-sm space-y-1">
-                                    <p>
-                                        <span className="font-medium">Priority:</span> {sec.priority}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium">Item:</span> {sec.name}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </SearchAndPaginationWrapper>
             </TableContainerCard>
 
             {/* Edit Dialog */}
-            <Dialog open={!!editSection} onOpenChange={() => setEditSection(null)}>
-                <DialogContent className='p-0  min-w-[98vw] sm:min-w-[90vw] md:min-w-[700px] lg:min-w-[900px]' >
-                   <div className="max-h-[calc(90vh)] p-5 overflow-y-auto  ">
-                    <DialogHeader>
-                            <DialogTitle>Edit Section</DialogTitle>
-                        </DialogHeader>
-                        {editSection && (
-                            <SectionForm mode="edit" onSubmit={handleEdit} defaultValues={editSection} />
-                        )}
-                   </div>
-                </DialogContent>
-            </Dialog>
+
+            {editSection && (
+                <SectionForm showDialog={!!editSection} setShowDialog={() => setEditSection(null)} mode="edit" onSubmit={handleEdit} defaultValues={editSection} loading={isUpdating} />
+            )}
+
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete the category &quot;{sectionToDelete?.name}&quot;. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setSectionToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

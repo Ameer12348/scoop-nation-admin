@@ -35,7 +35,7 @@ export default function AdminLayout({
           {/* Header */}
           <AppHeader />
           {/* Page Content */}
-          <div className="p-2.5 mx-auto max-w-(--breakpoint-2xl) md:p-4">{children}</div>
+          <div className="p-2.5 mx-auto max-w-[1800px] md:p-4">{children}</div>
         </div>
         <OrderNotify/>
       </ProtectedRoutes>
