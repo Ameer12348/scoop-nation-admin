@@ -19,8 +19,6 @@ export default function Profile() {
         </h3>
         <div className="space-y-3">
           <UserMetaCard />
-          <UserInfoCard />
-          <UserAddressCard />
         </div>
       </div>
     </div>

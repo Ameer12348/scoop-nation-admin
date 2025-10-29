@@ -1,18 +1,80 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import api from "@/lib/api";
+import { toast } from "react-hot-toast";
+
+interface AdminProfile {
+  user_id: number;
+  fullname: string | null;
+  gender: 'male' | 'female' | 'other' | null;
+  date_of_birth: string | null;
+  avatar: string | null;
+  email: string;
+  phone: string;
+  role: string;
+}
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+  const [profile, setProfile] = useState<AdminProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Get user ID from localStorage
+  const getUserId = () => {
+    const adminUser = localStorage.getItem('admin_user');
+    if (adminUser) {
+      const user = JSON.parse(adminUser);
+      return user.id || user.user_id;
+    }
+    return 1; // Default for testing
   };
+
+  // Fetch admin profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const userId = getUserId();
+        const response = await api.get(`/api/admin/profile?user_id=${userId}`);
+        
+        if (response.data.success) {
+          setProfile(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Not set';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  if (loading) {
+    return (
+      <div className="p-2 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-4 bg-gray-300 rounded"></div>
+            <div className="h-4 bg-gray-300 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-2 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -24,19 +86,19 @@ export default function UserInfoCard() {
           <div className="grid grid-cols-1 gap-2 lg:grid-cols-2 lg:gap-4 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                Full Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                {profile?.fullname || 'Not set'}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
+                Gender
               </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90 capitalize">
+                {profile?.gender || 'Not set'}
               </p>
             </div>
 
@@ -45,7 +107,7 @@ export default function UserInfoCard() {
                 Email address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                {profile?.email || 'Not set'}
               </p>
             </div>
 
@@ -54,16 +116,25 @@ export default function UserInfoCard() {
                 Phone
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
+                {profile?.phone || 'Not set'}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Bio
+                Date of Birth
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
+                {formatDate(profile?.date_of_birth as string)}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Role
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90 capitalize">
+                {profile?.role || 'Administrator'}
               </p>
             </div>
           </div>
@@ -92,96 +163,57 @@ export default function UserInfoCard() {
         </button>
       </div>
 
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-2.5 dark:bg-gray-900 lg:p-6">
+      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[500px] m-4">
+        <div className="no-scrollbar relative w-full max-w-[500px] overflow-y-auto rounded-3xl bg-white p-2.5 dark:bg-gray-900 lg:p-6">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Personal Information
+              View Profile Information
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update your details to keep your profile up-to-date.
+              Your profile details are displayed here. Use the main edit button to update.
             </p>
           </div>
-          <form className="flex flex-col">
-            <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
+          <div className="px-2 pb-3">
+            <div className="space-y-4">
               <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" defaultValue="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://instagram.com/PimjoHQ"
-                    />
-                  </div>
-                </div>
+                <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Full Name</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {profile?.fullname || 'Not set'}
+                </p>
               </div>
-              <div className="mt-7">
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" defaultValue="Musharof" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" defaultValue="Chowdhury" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Email Address</Label>
-                    <Input type="text" defaultValue="randomuser@pimjo.com" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Phone</Label>
-                    <Input type="text" defaultValue="+09 363 398 46" />
-                  </div>
-
-                  <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" defaultValue="Team Manager" />
-                  </div>
+              <div>
+                <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Email</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {profile?.email}
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Phone</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {profile?.phone || 'Not set'}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Gender</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-white/90 capitalize">
+                    {profile?.gender || 'Not set'}
+                  </p>
+                </div>
+                <div>
+                  <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Date of Birth</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                    {formatDate(profile?.date_of_birth as string)}
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
-              </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
-              </Button>
-            </div>
-          </form>
+          </div>
+          <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+            <Button size="sm" onClick={closeModal}>
+              Close
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
