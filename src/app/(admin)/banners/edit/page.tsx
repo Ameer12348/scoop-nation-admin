@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 
 function EditBannerClient() {
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams.get('bannerId');
 
   return (
     <div>
