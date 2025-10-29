@@ -17,7 +17,7 @@ import Image from 'next/image';
 
 // Import ImageGallery component
 import ImageGallery, { ImageType } from '@/components/gallery/ImageGallery';
-import ProductForm, { mockSections, ProductFormData, Section } from './ProductForm';
+import ProductForm, {  ProductFormData, Section } from './ProductForm';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { createProduct, CreateProductPayload, deleteProduct, fetchProducts } from '@/store/slices/productSlice';
 import { BASE_URL } from '@/consts';
@@ -112,9 +112,10 @@ export default function ProductDataTable() {
                 toast.error(data?.error || data?.message || 'Failed to add product')
             }
         },
-        onError: (error) => {
+        onError: (error :any) => {
             console.error('Mutation failed:', error);
-            toast.error(error?.message || 'Failed to add product');
+            toast.error(error?.response?.data?.error || 'Failed to update product');
+
         },
     });
     //update product
@@ -137,12 +138,13 @@ export default function ProductDataTable() {
                 handleFetchProducts()
             }
             else {
+                
                 toast.error(data?.error || data?.message || 'Failed to update product')
             }
         },
-        onError: (error) => {
+        onError: (error : any) => {
             console.error('Mutation failed:', error);
-            toast.error(error?.message || 'Failed to update product');
+            toast.error(error?.response?.data?.error || 'Failed to update product');
         },
     });
 

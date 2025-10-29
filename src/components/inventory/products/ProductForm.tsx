@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { z } from 'zod';
+import { json, z } from 'zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,8 @@ import { fetchProductDetails } from '@/store/slices/productSlice';
 import { error } from 'console';
 import { BASE_URL } from '@/consts';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import api from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
 
 // Define section interface
 export interface Section {
@@ -38,21 +40,7 @@ export interface Section {
     name: string;
 }
 
-// Define mock sections
-export const mockSections: Section[] = [
-    {
-        id: '1',
-        name: 'Ice Cream'
-    },
-    {
-        id: '2',
-        name: 'Drinks'
-    },
-    {
-        id: '3',
-        name: 'Toppings'
-    }
-];
+
 
 // Product schema based on the provided data structure
 const variantSchema = z.object({
@@ -126,7 +114,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
             price: defaultValues?.price || '',
             inStock: defaultValues?.inStock || '',
             categoryId: defaultValues?.categoryId || '',
-            is_available: defaultValues?.is_available || false,
+            is_available: defaultValues?.is_available || true,
             // rating: defaultValues?.rating || '0',
             // discountType: defaultValues?.discountType || null,
             // discountValue: defaultValues?.discountValue || null,
@@ -146,6 +134,20 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
             }],
             media: [],
             file:undefined
+        },
+    });
+
+    // Fetch categories
+    const { data: categoriesData, isLoading, refetch: refetchCategories } = useQuery({
+        queryKey: ['categories'],
+        queryFn: async () => {
+            const res = await api.get('/api/admin/categories', {
+                params: {
+                    page: 1,
+                    limit: 1000000,
+                },
+            });
+            return res.data;
         },
     });
 
@@ -207,7 +209,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                 // discountType: productDetails?.discountType || null,
                 // discountValue: productDetails?.discountValue || null,
                 originalPrice: productDetails?.originalPrice || null,
-                is_available: productDetails?.is_available || false,
+                is_available: typeof productDetails?.is_available === 'boolean' ? productDetails?.is_available : productDetails?.is_available == 1 ? true : false,
                 // discountStartDate: productDetails?.discountStartDate || null,
                 // discountEndDate: productDetails?.discountEndDate || null,
                 variants: productDetails?.variants.length > 0 ? productDetails?.variants.map(variant => ({
@@ -340,9 +342,9 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {mockSections.map((section) => (
-                                                <SelectItem key={section.id} value={section.id}>
-                                                    {section.name}
+                                            {categoriesData?.data?.map((section) => (
+                                                <SelectItem key={section?.id} value={section?.id}>
+                                                    {section?.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
