@@ -14,7 +14,7 @@ import { Label } from '../ui/label';
 import { Skeleton } from '../ui/skeleton';
 import Dropzone from '../form/form-elements/DropZone';
 import api from '@/lib/api';
-import { BASE_URL } from '@/consts';
+import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 
 // Constants for logo validation
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
@@ -118,7 +118,7 @@ export const SettingForm: React.FC = () => {
           setValue('description', data.data.description || '');
           setValue('logo', data.data.logo || '');
           if (data.data.logo) {
-            setPreview(`${BASE_URL}/${data.data.logo}`);
+            setPreview(`${IMAGE_BASE_URL}/${data.data.logo}`);
           }
         }
       } else {
@@ -155,7 +155,7 @@ export const SettingForm: React.FC = () => {
       setValue('description', companyData.data.description || '');
       setValue('logo', companyData.data.logo || '');
       if (companyData.data.logo) {
-        setPreview(`${BASE_URL}/${companyData.data.logo}`);
+        setPreview(`${IMAGE_BASE_URL}/${companyData.data.logo}`);
       }
     }
   }, [companyData, setValue]);

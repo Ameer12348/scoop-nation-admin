@@ -29,7 +29,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import ProductFormSkeleton from './ProductFormSkeleton';
 import { fetchProductDetails } from '@/store/slices/productSlice';
 import { error } from 'console';
-import { BASE_URL } from '@/consts';
+import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import api from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
@@ -702,7 +702,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                     if (med?.mime_type?.startsWith('image/')) {
                                         return  <div key={index} className='relative' >
                                             <img
-                                                src={`${BASE_URL}/`+med.image}
+                                                src={`${IMAGE_BASE_URL}/`+med.image}
                                                 alt={`Media ${index + 1}`}
                                                 width={250 }
                                                 height={250}
@@ -725,7 +725,7 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                     else if (med?.mime_type?.startsWith('video/')) {
                                         return  <div key={index} className='relative' >
                                             <video
-                                                src={`${BASE_URL}/`+med.image}
+                                                src={`${IMAGE_BASE_URL}/`+med.image}
                                                 width={250 }
                                                 height={250}
                                                 className="rounded-lg aspect-square object-contain"

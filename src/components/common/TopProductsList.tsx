@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { TopProduct } from '@/lib/analytics';
 import { Package, TrendingUp } from 'lucide-react';
-import { BASE_URL } from '@/consts';
+import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 
 interface TopProductsListProps {
   products: TopProduct[];
@@ -57,7 +57,7 @@ export default function TopProductsList({ products, isLoading }: TopProductsList
           <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
             {product.mainImage ? (
               <img
-                src={`${BASE_URL}/` +product.mainImage}
+                src={`${IMAGE_BASE_URL}/` +product.mainImage}
                 alt={product.title}
                 className="object-cover object-contan"
               />

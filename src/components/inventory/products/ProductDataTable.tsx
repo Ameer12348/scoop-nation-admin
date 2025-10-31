@@ -20,7 +20,7 @@ import ImageGallery, { ImageType } from '@/components/gallery/ImageGallery';
 import ProductForm, {  ProductFormData, Section } from './ProductForm';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { createProduct, CreateProductPayload, deleteProduct, fetchProducts } from '@/store/slices/productSlice';
-import { BASE_URL } from '@/consts';
+import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -276,7 +276,7 @@ export default function ProductDataTable() {
                                                         <td className="px-4 py-2">
                                                             {product.mainImage && (
                                                                 <img
-                                                                    src={`${BASE_URL}/` + product.mainImage}
+                                                                    src={`${IMAGE_BASE_URL}/` + product.mainImage}
                                                                     alt={product.title}
                                                                     width={40}
                                                                     height={40}
@@ -343,7 +343,7 @@ export default function ProductDataTable() {
                                                     <div className="flex items-center space-x-3">
                                                         {product.mainImage && (
                                                             <img
-                                                                src={`${BASE_URL}/` + product.mainImage}
+                                                                src={`${IMAGE_BASE_URL}/` + product.mainImage}
                                                                 alt={product.title}
                                                                 width={40}
                                                                 height={40}

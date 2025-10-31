@@ -7,7 +7,7 @@ import { FaRegEdit } from "react-icons/fa";
 import Switch from "../form/switch/Switch";
 import { Banner, deleteBanner } from "@/store/slices/bannerSlice";
 import Link from "next/link";
-import { BASE_URL } from "@/consts";
+import { BASE_URL, IMAGE_BASE_URL } from "@/consts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Loader, Trash2, X } from "lucide-react";
 import {
@@ -71,7 +71,7 @@ export default function BannerTable({banners}:BannerTableProps) {
                   </td> */}
                   <td className="px-3 py-2 border">
                       <img
-                        src={`${BASE_URL}/`+item.media[0].image}
+                        src={`${IMAGE_BASE_URL}/`+item.media[0].image}
                         alt="web banner"
                         width={90}
                         height={55}
@@ -144,7 +144,7 @@ export default function BannerTable({banners}:BannerTableProps) {
             >
               <div className="flex items-center justify-between">
                 <img
-                  src={`${BASE_URL}/`+item.media[0].image}
+                  src={`${IMAGE_BASE_URL}/`+item.media[0].image}
                   alt="webbanner"
                   width={100}
                   height={60}

@@ -8,7 +8,7 @@ import Label from "../form/Label";
 import Image from "next/image";
 import api from "@/lib/api";
 import { toast } from "react-hot-toast";
-import { BASE_URL } from "@/consts";
+import { BASE_URL, IMAGE_BASE_URL } from "@/consts";
 
 interface AdminProfile {
   user_id: number;
@@ -175,7 +175,7 @@ export default function UserMetaCard() {
                 <img
                   width={80}
                   height={80}
-                  src={avatarPreview || profile?.avatar ? `${BASE_URL}/`+ profile?.avatar : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7VxDe4wzr6eLzRrpRXsqUl1pgSst3Q1XytA&s"}
+                  src={avatarPreview || profile?.avatar ? `${IMAGE_BASE_URL}/`+ profile?.avatar : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7VxDe4wzr6eLzRrpRXsqUl1pgSst3Q1XytA&s"}
                   alt="user"
                   className="w-full h-full object-cover relative z-20"
                 />
@@ -273,7 +273,7 @@ export default function UserMetaCard() {
                       <img
                         width={96}
                         height={96}
-                        src={avatarPreview || profile?.avatar ? `${BASE_URL}/`+ profile?.avatar : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7VxDe4wzr6eLzRrpRXsqUl1pgSst3Q1XytA&s"}
+                        src={avatarPreview || profile?.avatar ? `${IMAGE_BASE_URL}/`+ profile?.avatar : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7VxDe4wzr6eLzRrpRXsqUl1pgSst3Q1XytA&s"}
                         alt="Avatar preview"
                         className="w-full h-full object-cover"
                       />

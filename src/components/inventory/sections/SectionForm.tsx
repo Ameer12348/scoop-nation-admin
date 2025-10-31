@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/form';
 import { Section } from './SectionDataTable';
 import Dropzone from '@/components/form/form-elements/DropZone';
-import { BASE_URL } from '@/consts';
+import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 import { X } from 'lucide-react';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 
@@ -50,7 +50,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
     });
 
     const [preview, setPreview] = useState<string | null>(
-        defaultValues?.mainImage ? `${BASE_URL}/${defaultValues.mainImage}` : null
+        defaultValues?.mainImage ? `${IMAGE_BASE_URL}/${defaultValues.mainImage}` : null
     );
     const [mediaFile, setMediaFile] = useState<File | null>(null);
 
@@ -60,7 +60,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
                 name: defaultValues.name ?? '',
                 file: undefined,
             });
-            setPreview(defaultValues.mainImage ? `${BASE_URL}/${defaultValues.mainImage}` : null);
+            setPreview(defaultValues.mainImage ? `${IMAGE_BASE_URL}/${defaultValues.mainImage}` : null);
         }
     }, [defaultValues, form]);
 
@@ -77,7 +77,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
 
     const removeMedia = () => {
         setMediaFile(null);
-        setPreview(defaultValues?.mainImage ? `${BASE_URL}/${defaultValues.mainImage}` : null);
+        setPreview(defaultValues?.mainImage ? `${IMAGE_BASE_URL}/${defaultValues.mainImage}` : null);
         form.setValue('file', undefined, { shouldValidate: true });
     };
 

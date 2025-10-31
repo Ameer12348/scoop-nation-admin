@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
 import { useCustomers } from "@/store/hooks";
 import Image from "next/image";
-import { BASE_URL } from "@/consts";
+import { BASE_URL, IMAGE_BASE_URL } from "@/consts";
 
 interface UserDetailsPopupProps {
     userId: number | string;
@@ -148,7 +148,7 @@ const OrderDetailCard = ({ order }: { order: RecentOrder }) => {
                         <li key={item?.product.id} className={`overflow-hidden transition duration-300 ${showOrderItems ? 'h-auto flex py-6 px-2' : 'h-0'}`}>
                             <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                                 <img
-                                    src={`${BASE_URL}/` + item?.product.mainImage}
+                                    src={`${IMAGE_BASE_URL}/` + item?.product.mainImage}
                                     alt={item?.product.title}
                                     className="h-full w-full object-cover object-center"
                                     width={100}
@@ -185,7 +185,7 @@ const OrderDetailCard = ({ order }: { order: RecentOrder }) => {
 
 const FavouriteCard = ({ fav }: { fav: any }) => {
     const imagePath = fav?.media?.url || fav?.media?.path || fav?.mainImage || '';
-    const imageSrc = imagePath ? `${BASE_URL}/${imagePath}` : '/images/brand/placeholder.png';
+    const imageSrc = imagePath ? `${IMAGE_BASE_URL}/${imagePath}` : '/images/brand/placeholder.png';
 
     return (
         <div className="bg-white p-3 rounded-lg border flex gap-3 items-start">

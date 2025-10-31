@@ -22,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import Dropzone from '../form/form-elements/DropZone';
-import { BASE_URL } from '@/consts';
+import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 import { Media } from '@/store/slices/bannerSlice';
 
 interface Banner {
@@ -444,7 +444,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                             if (med?.mime_type?.startsWith('image/')) {
                                 return <div key={index} className='relative' >
                                     <img
-                                        src={`${BASE_URL}/` + med.image}
+                                        src={`${IMAGE_BASE_URL}/` + med.image}
                                         alt={`Media ${index + 1}`}
                                         width={250}
                                         height={250}
@@ -467,7 +467,7 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                             else if (med?.mime_type?.startsWith('video/')) {
                                 return <div key={index} className='relative' >
                                     <video
-                                        src={`${BASE_URL}/` + med.image}
+                                        src={`${IMAGE_BASE_URL}/` + med.image}
                                         width={250}
                                         height={250}
                                         className="rounded-lg aspect-square object-contain"

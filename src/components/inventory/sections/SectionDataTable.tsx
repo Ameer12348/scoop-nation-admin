@@ -37,7 +37,7 @@ import SectionForm, { SectionFormData } from './SectionForm';
 import api from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { BASE_URL } from '@/consts';
+import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -251,7 +251,7 @@ export default function Sections() {
                                                     <img
                                                         width={80}
                                                         height={80}
-                                                        src={`${BASE_URL}/${sec.mainImage}`}
+                                                        src={`${IMAGE_BASE_URL}/${sec.mainImage}`}
                                                         alt={sec.name}
                                                         className="w-16 h-16 object-cover rounded"
                                                     />
@@ -286,7 +286,7 @@ export default function Sections() {
                                 <div key={sec.id} className="border rounded-lg p-3 shadow-sm bg-white">
                                     <div className="flex items-start justify-between">
                                         <img
-                                            src={`${BASE_URL}/${sec.mainImage}`}
+                                            src={`${IMAGE_BASE_URL}/${sec.mainImage}`}
                                             alt={sec.name}
                                             width={100}
                                             height={60}

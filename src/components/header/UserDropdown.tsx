@@ -7,7 +7,7 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useAuth } from "@/store/hooks";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
-import { BASE_URL } from "@/consts";
+import { BASE_URL, IMAGE_BASE_URL } from "@/consts";
 
 interface AdminProfile {
   user_id: number;
@@ -73,7 +73,7 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
           <img
             width={44}
             height={44}
-            src={profile?.avatar ? `${BASE_URL}/`+ profile?.avatar : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7VxDe4wzr6eLzRrpRXsqUl1pgSst3Q1XytA&s"}
+            src={profile?.avatar ? `${IMAGE_BASE_URL}/`+ profile?.avatar : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7VxDe4wzr6eLzRrpRXsqUl1pgSst3Q1XytA&s"}
             alt={profile?.fullname || "User"}
           />
         </span>
