@@ -42,6 +42,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Banners", path: "/banners", },
       { name: "Company Settings", path: "/settings", },
+      { name: "Layout Settings", path: "/layout-settings", },
       { name: "Email Templates", path: "/email_templates", },
     ],
   },
