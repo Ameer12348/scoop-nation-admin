@@ -42,13 +42,15 @@ interface SectionFormProps {
 }
 
 function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setShowDialog }: SectionFormProps) {
-    const form = useForm<SectionFormData>({
-        resolver: zodResolver(baseSchema),
-        defaultValues: {
+
+    const defaultValuesObj = {
             name: defaultValues?.name ?? '',
             file: undefined,
             priority: defaultValues?.priority 
-        },
+        };
+    const form = useForm<SectionFormData>({
+        resolver: zodResolver(baseSchema),
+        defaultValues: defaultValuesObj,
     });
 
     const [preview, setPreview] = useState<string | null>(
@@ -83,6 +85,11 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
         setPreview(defaultValues?.mainImage ? `${IMAGE_BASE_URL}/${defaultValues.mainImage}` : null);
         form.setValue('file', undefined, { shouldValidate: true });
     };
+    useEffect(()=>{
+        if (mode == 'add' && showDialog) {
+            form.reset(defaultValuesObj);
+        }
+    },[mode,showDialog]);
 
     return (
        <ConfirmDialog open={showDialog} setOpen={setShowDialog} loading={loading} title={mode === 'add' ? 'Add Category' : 'Edit Category'} onConfirm={form.handleSubmit(handleFormSubmit)}>

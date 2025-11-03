@@ -33,6 +33,7 @@ import { BASE_URL, IMAGE_BASE_URL } from '@/consts';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import api from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
+import { de } from 'zod/v4/locales';
 
 // Define section interface
 export interface Section {
@@ -73,13 +74,15 @@ const productSchema = z.object({
     // discountEndDate: z.string().nullable(),
     variants: z.array(variantSchema).min(1, 'At least one variant is required'),
     media: z.array(z.any()).optional(), 
-    file:z.instanceof(File).optional()
+    mediaFiles: z.array(z.instanceof(File)).optional(),
+    mainImage: z.instanceof(File).optional(),
+    existingMainImage: z.string().optional(),
 })  .superRefine((data, ctx) => {
-        if (data.file === undefined && data.media?.length === 0  ) {
+        if (!data.mainImage && !data.existingMainImage) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: 'At least one image must be uploaded',
-                path: ['file'],
+                message: 'Main image is required',
+                path: ['mainImage'],
             });
         }
     });
@@ -99,13 +102,8 @@ interface ProductFormProps {
 }
 
 function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDialog, setShowDialog }: ProductFormProps) {
-    const [mediaFiles, setMediaFiles] = useState<File | null>(null);
-    const [mainImage, setMainImage] = useState<File | null>(null);
-    const {detailsLoading,productDetails,detailsError} = useAppSelector(state=>state.products)
-    const dispatch = useAppDispatch()
-    const form = useForm<ProductFormData>({
-        resolver: zodResolver(productSchema),
-        defaultValues: {
+
+    const defaultValuesObj  = {
             title: defaultValues?.title || '',
             // slug: defaultValues?.slug || '',
             description: defaultValues?.description || '',
@@ -133,8 +131,17 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                 // discountEndDate: null,
             }],
             media: [],
-            file:undefined
-        },
+            mediaFiles: [],
+            mainImage: undefined,
+            existingMainImage: undefined,
+        };
+    const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+    const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+    const {detailsLoading,productDetails,detailsError} = useAppSelector(state=>state.products)
+    const dispatch = useAppDispatch()
+    const form = useForm<ProductFormData>({
+        resolver: zodResolver(productSchema),
+        defaultValues: defaultValuesObj, 
     });
 
     // Fetch categories
@@ -159,18 +166,30 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
     // Watch media field to trigger re-renders when it changes
     const mediaWatch = form.watch('media');
 
-    const handleMediaUpload = (file: File) => {
-        console.log('Uploaded file:', file);
-        const newFiles = file;
-        setMediaFiles(file);
-        form.setValue('file', newFiles); // Sync to form (as URLs for now)
+    const handleMainImageUpload = (file: File) => {
+        console.log('Uploaded main image:', file);
+        setMainImageFile(file);
+        form.setValue('mainImage', file);
+        form.setValue('existingMainImage', undefined);
     };
 
-    const removeMedia = () => {
-        // const newFiles = mediaFiles.filter((_, i) => i !== index);
-        setMediaFiles(null);
-        // form.setValue('media', newFiles.map(f => URL.createObjectURL(f)));
-        form.reset({file:undefined});
+    const removeMainImage = () => {
+        setMainImageFile(null);
+        form.setValue('mainImage', undefined);
+        form.setValue('existingMainImage', undefined);
+    };
+
+    const handleMediaUpload = (file: File) => {
+        console.log('Uploaded media file:', file);
+        const newFiles = [...mediaFiles, file];
+        setMediaFiles(newFiles);
+        form.setValue('mediaFiles', newFiles);
+    };
+
+    const removeMediaFile = (index: number) => {
+        const newFiles = mediaFiles.filter((_, i) => i !== index);
+        setMediaFiles(newFiles);
+        form.setValue('mediaFiles', newFiles);
     };
 
     const handleSubmit = (data: ProductFormData) => {
@@ -196,6 +215,8 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
 
     useEffect(()=>{  
         if (mode == 'edit' && productDetails){
+            setMainImageFile(null);
+            setMediaFiles([]);
             form.reset({
                 title: productDetails?.title || '',
                 // slug: productDetails?.slug || '',
@@ -233,7 +254,10 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                     discountStartDate: null,
                     discountEndDate: null,
                 }],
-                media: productDetails?.media || []
+                media: productDetails?.media || [],
+                mediaFiles: [],
+                mainImage: undefined,
+                existingMainImage: productDetails?.mainImage || undefined,
             }
             );
         }
@@ -242,6 +266,9 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
     useEffect(()=>{
         if (mode == 'edit' && productId){
             dispatch(fetchProductDetails(productId))
+        }
+        if (mode =='add' && showDialog) {
+            form.reset(defaultValuesObj);
         }
     },[productId,mode]);
 
@@ -649,9 +676,67 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                     <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Images</h3>
                         
-
+                        {/* Main Image Upload */}
                         <div>
-                            <h4 className="text-md font-medium mb-2">Additional Images</h4>
+                            <h4 className="text-md font-medium mb-2">Main Image (Thumbnail) *</h4>
+                            <Dropzone
+                                acceptedFiles={{
+                                    'image/png': [],
+                                    'image/jpeg': [],
+                                    'image/webp': [],
+                                }}
+                                onDone={handleMainImageUpload}
+                            />
+                            {form.formState.errors.mainImage && (
+                                <p className="text-sm text-red-600 mt-1">{form.formState.errors.mainImage.message}</p>
+                            )}
+                            <div className="mt-2 flex items-center flex-wrap gap-2">
+                                {mainImageFile && (
+                                    <div className='relative'>
+                                        <img
+                                            src={URL.createObjectURL(mainImageFile)}
+                                            alt="Main Image"
+                                            width={250}
+                                            height={250}
+                                            className="rounded-lg aspect-square object-contain border-2 border-brand-500"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute top-2 right-2"
+                                            onClick={() => removeMainImage()}
+                                        >
+                                            <X size={16} />
+                                        </Button>
+                                    </div>
+                                )}
+                                {!mainImageFile && form.getValues('existingMainImage') && (
+                                    <div className='relative'>
+                                        <img
+                                            src={`${IMAGE_BASE_URL}/` + form.getValues('existingMainImage')}
+                                            alt="Main Image"
+                                            width={250}
+                                            height={250}
+                                            className="rounded-lg aspect-square object-contain border-2 border-brand-500"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute top-2 right-2"
+                                            onClick={() => removeMainImage()}
+                                        >
+                                            <X size={16} />
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Additional Media Upload */}
+                        <div>
+                            <h4 className="text-md font-medium mb-2">Additional Images/Videos</h4>
                             <Dropzone
                                 acceptedFiles={{
                                     'image/png': [],
@@ -661,24 +746,21 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                 }}
                                 onDone={handleMediaUpload}
                             />
-                            {form.formState.errors.file && (
-                                <p className="text-sm text-red-600 mt-1">{form.formState.errors.file.message}</p>
-                            )}
                             <div className="mt-2 flex items-center flex-wrap gap-2">
-
-                                {mediaFiles && (
-                                    <div className='relative'>
-                                        {mediaFiles.type.startsWith('image/') ? (
+                                {/* New uploaded files */}
+                                {mediaFiles.map((file, index) => (
+                                    <div key={`new-${index}`} className='relative'>
+                                        {file.type.startsWith('image/') ? (
                                             <img
-                                                src={URL.createObjectURL(mediaFiles)}
-                                                alt={`Media files`}
+                                                src={URL.createObjectURL(file)}
+                                                alt={`Media ${index + 1}`}
                                                 width={250}
                                                 height={250}
                                                 className="rounded-lg aspect-square object-contain"
                                             />
-                                        ) : mediaFiles.type.startsWith('video/') ? (
+                                        ) : file.type.startsWith('video/') ? (
                                             <video
-                                                src={URL.createObjectURL(mediaFiles)}
+                                                src={URL.createObjectURL(file)}
                                                 width={250}
                                                 height={250}
                                                 className="rounded-lg aspect-square object-contain"
@@ -690,21 +772,21 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                             variant="destructive"
                                             size="icon"
                                             className="absolute top-2 right-2"
-                                            onClick={() => removeMedia()}
+                                            onClick={() => removeMediaFile(index)}
                                         >
                                             <X size={16} />
                                         </Button>
                                     </div>
-                                )}
+                                ))}
 
-                                {
-                                    mediaWatch && mediaWatch?.map((med, index) => {
+                                {/* Existing media from database */}
+                                {mediaWatch && mediaWatch?.map((med, index) => {
                                     if (med?.mime_type?.startsWith('image/')) {
-                                        return  <div key={index} className='relative' >
+                                        return <div key={`existing-${med.imageID}`} className='relative'>
                                             <img
-                                                src={`${IMAGE_BASE_URL}/`+med.image}
+                                                src={`${IMAGE_BASE_URL}/` + med.image}
                                                 alt={`Media ${index + 1}`}
-                                                width={250 }
+                                                width={250}
                                                 height={250}
                                                 className="rounded-lg aspect-square object-contain"
                                             />
@@ -713,8 +795,8 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                                 variant="destructive"
                                                 size="icon"
                                                 className="absolute top-2 right-2"
-                                                onClick={() => {    
-                                                const newMedia = form.getValues('media')?.filter((medf) => medf.imageID  !== med.imageID ); 
+                                                onClick={() => {
+                                                    const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
                                                     form.setValue('media', newMedia, { shouldValidate: true, shouldDirty: true })
                                                 }}
                                             >
@@ -723,10 +805,10 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                         </div>
                                     }
                                     else if (med?.mime_type?.startsWith('video/')) {
-                                        return  <div key={index} className='relative' >
+                                        return <div key={`existing-${med.imageID}`} className='relative'>
                                             <video
-                                                src={`${IMAGE_BASE_URL}/`+med.image}
-                                                width={250 }
+                                                src={`${IMAGE_BASE_URL}/` + med.image}
+                                                width={250}
                                                 height={250}
                                                 className="rounded-lg aspect-square object-contain"
                                                 controls
@@ -736,8 +818,8 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                                 variant="destructive"
                                                 size="icon"
                                                 className="absolute top-2 right-2"
-                                                onClick={() => {    
-                                                    const newMedia = form.getValues('media')?.filter((medf) => medf.imageID  !== med.imageID ); 
+                                                onClick={() => {
+                                                    const newMedia = form.getValues('media')?.filter((medf) => medf.imageID !== med.imageID);
                                                     form.setValue('media', newMedia, { shouldValidate: true, shouldDirty: true })
                                                 }}
                                             >
@@ -745,16 +827,9 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                             </Button>
                                         </div>
                                     }
-                                    
-                                    
-                                    else{
-                                        <></>
-                                    }
-    })
-                                }
-
+                                    return null;
+                                })}
                             </div>
-
                         </div>
                     </div>
 

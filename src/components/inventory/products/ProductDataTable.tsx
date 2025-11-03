@@ -155,43 +155,74 @@ export default function ProductDataTable() {
         console.log('handle add',data);
         
         const formData = new FormData();
+        
+        // Add main image
+        if (data.mainImage) {
+            formData.append('mainImage', data.mainImage);
+        }
+        
+        // Add multiple media files
+        if (data.mediaFiles && data.mediaFiles.length > 0) {
+            data.mediaFiles.forEach((file) => {
+                formData.append('mediaFiles[]', file);
+            });
+        }
+        
+        // Add variants as JSON
+        if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
+            formData.append('variants', JSON.stringify(data.variants));
+        }
+        
+        // Add other fields
         for (const key in data) {
             const value = data[key as keyof ProductFormData];
-            if (key === 'variants' && value && Array.isArray(value) && value.length > 0) {
-                formData.append('variants', JSON.stringify(value));
-            } else if (key === 'file' && value) {
-                formData.append('file', data.file as File);
-            } else if (value !== undefined && value !== null) {
-                formData.append(key, value as any);
+            if (key !== 'variants' && key !== 'mainImage' && key !== 'mediaFiles' && key !== 'media' && key !== 'existingMainImage') {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value as any);
+                }
             }
         }
+        
         addProduct(formData)
-        // dispatch(createProduct(data as CreateProductPayload)).then((res) => {
-        //     console.log('res', res);
-        //     if (res.meta.requestStatus === 'fulfilled') {
-        //         setShowAddFormDialog(false)
-        //     }
-        // })
     };
 
     // Handle editing an existing product
     const handleEdit = (data: ProductFormData) => {
-   const formData = new FormData();
+        const formData = new FormData();
+        
+        // Add main image if changed
+        if (data.mainImage) {
+            formData.append('mainImage', data.mainImage);
+        }
+        
+        // Add multiple media files
+        if (data.mediaFiles && data.mediaFiles.length > 0) {
+            data.mediaFiles.forEach((file) => {
+                formData.append('mediaFiles[]', file);
+            });
+        }
+        
+        // Add variants as JSON
+        if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
+            formData.append('variants', JSON.stringify(data.variants));
+        }
+        
+        // Add existing media that should be kept
+        if (data.media) {
+            formData.append('media', JSON.stringify(data.media));
+        }
+        
+        // Add other fields
         for (const key in data) {
             const value = data[key as keyof ProductFormData];
-            if (key === 'variants' && value && Array.isArray(value) && value.length > 0) {
-                formData.append('variants', JSON.stringify(value));
-            } else if (key === 'file' && value) {
-                formData.append('file', data.file as File);
-            }
-            else if (key === 'media' && value) {
-                formData.append('media', JSON.stringify(data.media));
-            }
-            else if (value !== undefined && value !== null) {
-                formData.append(key, value as any);
+            if (key !== 'variants' && key !== 'mainImage' && key !== 'mediaFiles' && key !== 'media' && key !== 'existingMainImage') {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value as any);
+                }
             }
         }
-        updateProduct({formData,productId:editProduct?.id as string})
+        
+        updateProduct({formData, productId: editProduct?.id as string})
     };
 
     // Handle deleting a product
