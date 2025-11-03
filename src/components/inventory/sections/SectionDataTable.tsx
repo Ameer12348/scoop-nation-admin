@@ -63,6 +63,7 @@ const daysOfWeek: string[] = [
 export type Section = {
     id: string;
     name: string;
+    priority: string;
     mainImage: string;
     branch_id?: number;
 };
@@ -169,6 +170,9 @@ export default function Sections() {
     const handleAdd = (data: SectionFormData) => {
         const formData = new FormData();
         formData.append('name', data.name);
+        if (data?.priority) {
+            formData.append('priority', data.priority);
+        }
         if (data.file) {
             formData.append('file', data.file);
         }
@@ -180,6 +184,9 @@ export default function Sections() {
         const formData = new FormData();
         formData.append('id', editSection.id);
         formData.append('name', data.name);
+        if (data?.priority) {
+            formData.append('priority', data.priority);
+        }
         if (data.file) {
             formData.append('file', data.file);
         }

@@ -26,6 +26,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 
 const baseSchema = z.object({
     name: z.string().min(1, 'Name is required'),
+    priority: z.string().optional(),
     file: z.instanceof(File).optional(),
 });
 
@@ -46,6 +47,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
         defaultValues: {
             name: defaultValues?.name ?? '',
             file: undefined,
+            priority: defaultValues?.priority 
         },
     });
 
@@ -59,6 +61,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
             form.reset({
                 name: defaultValues.name ?? '',
                 file: undefined,
+                priority: defaultValues.priority
             });
             setPreview(defaultValues.mainImage ? `${IMAGE_BASE_URL}/${defaultValues.mainImage}` : null);
         }
@@ -94,6 +97,19 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
                             <FormLabel>Name</FormLabel>
                             <FormControl>
                                 <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="priority"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Priority</FormLabel>
+                            <FormControl>
+                                <Input type='number' {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
