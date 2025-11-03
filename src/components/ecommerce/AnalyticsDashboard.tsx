@@ -72,6 +72,18 @@ export default function AnalyticsDashboard() {
     };
   };
 
+  function handleOrderUpdate(data: { orderId: number; status: string }) {
+    const { orderId, status } = data;
+    const updatedOrders = analytics?.recent_orders.map(order => {
+      if (order.id == orderId) {
+        return { ...order, status };
+      }
+      return order;
+    });
+    setAnalytics(prev => prev ? { ...prev, recent_orders: updatedOrders || [] } : null);
+  }
+
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -263,6 +275,7 @@ export default function AnalyticsDashboard() {
         <RecentOrdersTable 
           orders={analytics?.recent_orders || []} 
           isLoading={isLoading}
+          onOrderUpdate={handleOrderUpdate}
         />
       </div>
     </div>
