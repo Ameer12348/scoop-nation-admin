@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
     icon: <FaList />,
     name: "Inventory",
     subItems: [
-      { name: "Sections", path: "/sections", },
+      { name: "Categories", path: "/categories", },
       { name: 'Items Management', path: '/items-management' },
       // {name:'Gallery',path:'/gallery'},
     ],

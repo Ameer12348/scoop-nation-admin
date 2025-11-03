@@ -1,6 +1,7 @@
 "use client";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
+import { IMAGE_BASE_URL } from "@/consts";
 import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
@@ -87,14 +88,14 @@ const AppHeader: React.FC = () => {
               width={154}
               height={32}
               className="dark:hidden"
-              src="./images/logo/logo.svg"
+              src={`${IMAGE_BASE_URL}`+'/media/company/logo.png'}
               alt="Logo"
             />
             <img
               width={154}
               height={32}
               className="hidden dark:block"
-              src="./images/logo/logo-dark.svg"
+              src={`${IMAGE_BASE_URL}`+'/media/company/logo.png'}
               alt="Logo"
             />
           </Link>

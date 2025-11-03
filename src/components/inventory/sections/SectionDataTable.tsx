@@ -215,9 +215,9 @@ export default function Sections() {
 
 
             <TableContainerCard
-                title="Sections"
+                title="Categories"
                 addButton
-                addButtonText="Add Section"
+                addButtonText="Add Category"
                 addButtonAction={() => { setShowAddFormDialog(true) }}
                  refreshButtonAction={()=>{refetchCategories()}}
                  hasRefreshButton={true}

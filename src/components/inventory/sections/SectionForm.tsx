@@ -85,7 +85,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
     };
 
     return (
-       <ConfirmDialog open={showDialog} setOpen={setShowDialog} loading={loading} title={mode === 'add' ? 'Add Section' : 'Edit Section'} onConfirm={form.handleSubmit(handleFormSubmit)}>
+       <ConfirmDialog open={showDialog} setOpen={setShowDialog} loading={loading} title={mode === 'add' ? 'Add Category' : 'Edit Category'} onConfirm={form.handleSubmit(handleFormSubmit)}>
          <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
                 {/* --- Name Field --- */}
@@ -163,7 +163,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
                 )}
 
                 {/* <Button type="submit" disabled={loading}>
-                    {loading ? 'Saving...' : mode === 'add' ? 'Add Section' : 'Save Changes'}
+                    {loading ? 'Saving...' : mode === 'add' ? 'Add Category' : 'Save Changes'}
                 </Button> */}
             </form>
         </Form>
