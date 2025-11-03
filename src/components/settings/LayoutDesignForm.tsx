@@ -27,16 +27,16 @@ const layoutOptions = [
     image: '/images/layouts/three-rows.png',
   },
   {
-    value: 'SECTIONS_PRODUCTS',
-    label: 'Sections Products Layout',
-    description: 'Display products grouped by sections',
-    image: '/images/layouts/sections-products.png',
+    value: 'FOUR_ROWS',
+    label: 'Four Rows Layout',
+    description: 'Display products in four rows per section',
+    image: '/images/layouts/four-rows.png',
   },
 ];
 
 // Zod schema for form validation
 const layoutDesignSchema = z.object({
-  products_layout: z.enum(['TWO_ROWS', 'THREE_ROWS', 'SECTIONS_PRODUCTS']),
+  products_layout: z.enum(['TWO_ROWS', 'THREE_ROWS', 'FOUR_ROWS']),
 });
 
 type LayoutDesignSchema = z.infer<typeof layoutDesignSchema>;
@@ -58,10 +58,10 @@ export const LayoutDesignForm: React.FC = () => {
   const selectedLayout = watch('products_layout');
 
   // Fetch layout design
-  const { 
-    data: layoutData, 
-    isPending: fetchLayoutLoading, 
-    error: fetchLayoutError 
+  const {
+    data: layoutData,
+    isPending: fetchLayoutLoading,
+    error: fetchLayoutError
   } = useQuery({
     queryKey: ['layout-design'],
     queryFn: async () => {
@@ -71,9 +71,9 @@ export const LayoutDesignForm: React.FC = () => {
   });
 
   // Update layout design mutation
-  const { 
-    isPending: updateLayoutLoading, 
-    mutate: updateLayout 
+  const {
+    isPending: updateLayoutLoading,
+    mutate: updateLayout
   } = useMutation({
     mutationFn: async (data: LayoutDesignSchema) => {
       const res = await api.post('/api/admin/update-layout-design', data);
@@ -114,7 +114,7 @@ export const LayoutDesignForm: React.FC = () => {
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-40 w-full" />
         </div>
-        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-48 w-24" />
       </div>
     );
   }
@@ -137,11 +137,10 @@ export const LayoutDesignForm: React.FC = () => {
           {layoutOptions.map((option) => (
             <div
               key={option.value}
-              className={`relative flex items-start space-x-4 rounded-lg border-2 p-4 transition-all cursor-pointer hover:border-primary/50 ${
-                selectedLayout === option.value
-                  ? 'border-primary bg-primary/5'
-                  : 'border-muted'
-              }`}
+              className={`relative flex items-start space-x-4 rounded-lg border-2 p-4 transition-all cursor-pointer hover:border-primary/50 ${selectedLayout === option.value
+                ? 'border-primary bg-primary/5'
+                : 'border-muted'
+                }`}
               onClick={() => setValue('products_layout', option.value as any)}
             >
               {/* Custom Radio Button */}
@@ -169,56 +168,75 @@ export const LayoutDesignForm: React.FC = () => {
                 <p className="text-sm text-muted-foreground">
                   {option.description}
                 </p>
-                
+
                 {/* Preview Image Placeholder */}
                 <div className="mt-3 rounded-md border bg-muted/30 p-4 flex items-center justify-center min-h-[120px]">
                   {option.value === 'TWO_ROWS' && (
-                    <div className="space-y-2 w-full">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="h-12 bg-primary/20 rounded"></div>
-                        <div className="h-12 bg-primary/20 rounded"></div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="h-12 bg-primary/20 rounded"></div>
-                        <div className="h-12 bg-primary/20 rounded"></div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {option.value === 'THREE_ROWS' && (
-                    <div className="space-y-2 w-full">
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                        <div className="h-10 bg-primary/20 rounded"></div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {option.value === 'SECTIONS_PRODUCTS' && (
                     <div className="space-y-3 w-full">
                       <div className="space-y-1">
-                        <div className="h-6 w-32 bg-primary/30 rounded"></div>
+                        <div className="h-32 bg-primary/20 rounded flex justify-center items-center">
+                          <div className='text-white text-2xl'>
+                            Section Banner Image
+                          </div>
+                        </div>
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="h-10 bg-primary/20 rounded"></div>
-                          <div className="h-10 bg-primary/20 rounded"></div>
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
                         </div>
                       </div>
+
+                    </div>
+                  )}
+
+                  {option.value === 'THREE_ROWS' && (
+                    <div className="space-y-3 w-full">
                       <div className="space-y-1">
-                        <div className="h-6 w-32 bg-primary/30 rounded"></div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="h-10 bg-primary/20 rounded"></div>
-                          <div className="h-10 bg-primary/20 rounded"></div>
+                        <div className="h-32 bg-primary/20 rounded flex justify-center items-center">
+                          <div className='text-white text-2xl'>
+                            Section Banner Image
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+
+                  {option.value === 'FOUR_ROWS' && (
+                    <div className="space-y-3 w-full">
+                      <div className="space-y-1">
+                        <div className="h-32 bg-primary/20 rounded flex justify-center items-center">
+                          <div className='text-white text-2xl'>
+                            Section  Banner Image
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
+                          <div className="h-48 bg-primary/20 rounded flex justify-center items-center"><div className='text-white text-2xl'>
+                            Product Card
+                          </div></div>
                         </div>
                       </div>
                     </div>
@@ -236,9 +254,9 @@ export const LayoutDesignForm: React.FC = () => {
       </div>
 
       {/* Submit Button */}
-      <Button 
-        type="submit" 
-        disabled={updateLayoutLoading} 
+      <Button
+        type="submit"
+        disabled={updateLayoutLoading}
         className="w-full sm:w-auto"
       >
         {updateLayoutLoading ? (

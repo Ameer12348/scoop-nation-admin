@@ -132,7 +132,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
                             'image/jpeg': [],
                             'image/webp': [],
                         }}
-                        fixedRatio={1}
+                        fixedRatio={1148/327}
                         onDone={handleMediaUpload}
                         showDescription={false}
                         title='Drag & Drop Category Image'
@@ -145,7 +145,7 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
                 {/* Preview */}
                 {preview && (
                     <div className="mt-2">
-                        <FormLabel>Preview</FormLabel>
+                        <FormLabel className='mb-2'>Preview</FormLabel>
                         <div className='relative inline-block'>
                             <img
                                 src={preview}
