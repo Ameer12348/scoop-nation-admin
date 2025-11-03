@@ -711,10 +711,10 @@ function ProductForm({ mode, onSubmit, defaultValues,productId ,saving, showDial
                                         </Button>
                                     </div>
                                 )}
-                                {!mainImageFile && form.getValues('existingMainImage') && (
+                                {!mainImageFile && form.watch('existingMainImage') && (
                                     <div className='relative'>
                                         <img
-                                            src={`${IMAGE_BASE_URL}/` + form.getValues('existingMainImage')}
+                                            src={`${IMAGE_BASE_URL}/` + form.watch('existingMainImage')}
                                             alt="Main Image"
                                             width={250}
                                             height={250}
