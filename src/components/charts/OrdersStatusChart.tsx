@@ -49,7 +49,8 @@ export default function OrdersStatusChart({
   const labels = data.map(item => 
     item.status.charAt(0).toUpperCase() + item.status.slice(1)
   );
-  const counts = data.map(item => item.count);
+  // Convert to numbers to prevent string concatenation
+  const counts = data.map(item => Number(item.count) || 0);
   const colors = data.map(item => statusColorMap[item.status.toLowerCase()] || '#6B7280');
 
   if (type === 'donut') {
@@ -67,7 +68,10 @@ export default function OrdersStatusChart({
         },
         style: {
           fontSize: '14px',
-          fontWeight: 600,
+          fontWeight: 400,
+        },
+        dropShadow: {
+          enabled: false,
         },
       },
       plotOptions: {
