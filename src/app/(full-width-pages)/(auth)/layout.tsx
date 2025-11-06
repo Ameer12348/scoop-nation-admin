@@ -1,5 +1,6 @@
 import GridShape from "@/components/common/GridShape";
 import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
+import { IMAGE_BASE_URL } from "@/consts";
 
 import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
@@ -25,12 +26,12 @@ export default function AuthLayout({
                   <img
                     width={231}
                     height={48}
-                    src="./images/logo/auth-logo.svg"
+                    src={`${IMAGE_BASE_URL}`+'/media/company/logo.png'}
                     alt="Logo"
                   />
                 </Link>
                 <p className="text-center text-gray-400 dark:text-white/60">
-                  Free and Open-Source Tailwind CSS Admin Dashboard Template
+                 Scoop Nation Admin Panel
                 </p>
               </div>
             </div>
