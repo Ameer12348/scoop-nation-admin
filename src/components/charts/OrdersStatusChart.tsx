@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { ApexOptions } from 'apexcharts';
+import ReactApexChart from 'react-apexcharts';
 
-const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 interface OrdersStatusChartProps {
   data: {

@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { ApexOptions } from 'apexcharts';
 import { format } from 'date-fns';
+import ReactApexChart from 'react-apexcharts';
 
-const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 interface SalesChartProps {
   data: {

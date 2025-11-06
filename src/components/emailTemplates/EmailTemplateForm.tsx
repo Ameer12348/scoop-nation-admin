@@ -10,9 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader } from 'lucide-react'
-import dynamic from 'next/dynamic'
+import JoditEditor from 'jodit-react'
 // import 'jodit/build/jodit.min.css'
-const JoditEditor = dynamic(() => import('jodit-react'), { ssr: false })
 
 interface EmailTemplate {
   id?: string | number
