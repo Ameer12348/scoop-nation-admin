@@ -132,9 +132,9 @@ function SectionForm({ mode, onSubmit, defaultValues, loading, showDialog, setSh
                             'image/jpeg': [],
                             'image/webp': [],
                         }}
-                        fixedRatio={1148/327}
                         onDone={handleMediaUpload}
-                        showDescription={false}
+                        showDescription={true}
+                        description='Recommended Size 1148 x 327 pixels. Max file size 5MB.'
                         title='Drag & Drop Category Image'
                     />
                     {form.formState.errors.file && (

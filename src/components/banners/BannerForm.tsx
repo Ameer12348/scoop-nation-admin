@@ -397,9 +397,9 @@ export function BannerForm({ banner, onSubmit, onCancel, loading }: {
                             'image/jpeg': [],
                             'image/webp': [],
                         }}
-                        fixedRatio={1440/500}
                         onDone={handleMediaUpload}
-                        showDescription={false}
+                        showDescription={true}
+                        description='Recommended size 1440 x 500 pixels. Max file size 5MB.'
                         title='Drag & Drop Banner Image'
                     />
                     {form.formState.errors.file && (
